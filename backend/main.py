@@ -13,7 +13,7 @@ app = FastAPI()
 
 # CORS
 origins = [
-    "http://localhost:3000",
+    "http://localhost:3000","*","https://nutmunch-global.vercel.app/"
 ]
 
 app.add_middleware(
