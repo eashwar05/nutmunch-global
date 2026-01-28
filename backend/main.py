@@ -13,12 +13,15 @@ app = FastAPI()
 
 # CORS
 origins = [
-    "http://localhost:3000","*","https://nutmunch-global.vercel.app/"
+    "http://localhost:3000",
+    "http://localhost:5173",  # Common Vite local port
+    "https://nutmunch-global.vercel.app",
+    "*", # This wildcard allows ALL domains to talk to your API
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
