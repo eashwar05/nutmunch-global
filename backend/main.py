@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from pydantic import BaseModel
 from database import SessionLocal, engine
-import models, schemas
+import models
 
 # Create tables (if not already created by seed)
 models.Base.metadata.create_all(bind=engine)
