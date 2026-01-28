@@ -3,8 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from pydantic import BaseModel
-from .database import SessionLocal, engine
-from . import models
+from database import SessionLocal, engine
+import models, schemas
 
 # Create tables (if not already created by seed)
 models.Base.metadata.create_all(bind=engine)
