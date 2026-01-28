@@ -1,0 +1,8 @@
+{
+  "name": "Copy of Nutmunch - Premium Nut Concierge",
+  "description": "A high-end e-commerce experience for premium California almonds, featuring artisanal collections, global export services, and an AI-powered cultivar concierge.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
