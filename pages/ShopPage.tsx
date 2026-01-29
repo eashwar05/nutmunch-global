@@ -61,23 +61,26 @@ const ShopPage: React.FC = () => {
   if (error) return <div className="flex justify-center items-center h-screen text-red-500 font-bold">{error}</div>;
 
   return (
-    <main className="max-w-[1440px] mx-auto px-6 lg:px-20 py-8 min-h-screen">
-      {/* Breadcrumbs */}
-      <div className="mb-10">
-        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-primary/40 mb-4">
+
+    <main className="max-w-[1440px] mx-auto px-6 lg:px-20 py-12 min-h-screen">
+      {/* Breadcrumbs & Header */}
+      <div className="mb-20 animate-fade-in">
+        <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-primary/30 mb-8">
           <Link className="hover:text-primary transition-colors" to="/">Home</Link>
           <span className="material-symbols-outlined text-[10px]">chevron_right</span>
           <span className="text-primary/80">Collections</span>
         </div>
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-10">
           <div className="max-w-2xl">
-            <h1 className="text-4xl md:text-5xl font-black text-primary mb-4 leading-tight">Curated Almond Collections</h1>
-            <p className="text-lg text-primary/60 font-light">Directly sourced from the world's most prestigious orchards. Sustainably harvested, meticulously graded, and packed for freshness.</p>
+            <h1 className="font-display text-5xl md:text-6xl font-black text-primary mb-6 leading-[0.9]">Curated Collections</h1>
+            <p className="text-lg text-primary/60 font-light leading-relaxed max-w-xl">
+              Directly sourced from the world's most prestigious orchards. Sustainably harvested, meticulously graded, and packed for peak freshness.
+            </p>
           </div>
           <div className="flex items-center gap-4 border-b border-primary/10 pb-2">
-            <span className="text-sm font-medium text-primary/50 whitespace-nowrap">Sort by:</span>
-            <select className="bg-transparent border-none text-sm font-bold text-primary focus:ring-0 cursor-pointer">
-              <option>Featured Selection</option>
+            <span className="text-xs font-bold uppercase tracking-widest text-primary/40 whitespace-nowrap">Sort Order</span>
+            <select className="bg-transparent border-none text-xs font-bold text-primary focus:ring-0 cursor-pointer uppercase tracking-widest text-right">
+              <option>Featured</option>
               <option>Price: Low to High</option>
               <option>Price: High to Low</option>
               <option>Newest Harvest</option>
@@ -86,89 +89,84 @@ const ShopPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-12">
-        {/* Sidebar Filters */}
-        <aside className="w-full lg:w-64 flex-shrink-0">
-          <div className="sticky top-28 space-y-8">
+      <div className="flex flex-col lg:flex-row gap-20">
+        {/* Sidebar Filters - Minimal */}
+        <aside className="w-full lg:w-48 flex-shrink-0 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+          <div className="sticky top-32 space-y-12">
             <div>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-bold uppercase tracking-widest text-primary">Grade</h3>
-                <button onClick={() => setFilterGrade([])} className="text-[10px] font-bold text-accent-gold uppercase hover:underline">Clear</button>
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="font-display text-lg font-bold text-primary">Grade</h3>
+                {(filterGrade.length > 0) && (
+                  <button onClick={() => setFilterGrade([])} className="text-[9px] font-bold text-accent-gold uppercase tracking-widest hover:underline">Reset</button>
+                )}
               </div>
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {['Premium', 'Standard', 'Reserve'].map(grade => (
                   <label key={grade} className="flex items-center gap-3 cursor-pointer group">
-                    <input
-                      type="checkbox"
-                      checked={filterGrade.includes(grade)}
-                      onChange={() => toggleFilter(grade, filterGrade, setFilterGrade)}
-                      className="size-5 rounded border-2 border-primary/20 text-primary focus:ring-0 focus:ring-offset-0 transition-all checked:bg-primary"
-                    />
-                    <span className="text-sm font-medium text-primary/80 group-hover:text-primary">{grade}</span>
+                    <div className={`w-3 h-3 border border-primary/30 flex items-center justify-center transition-all ${filterGrade.includes(grade) ? 'bg-primary border-primary' : 'bg-transparent group-hover:border-primary'}`}>
+                      {filterGrade.includes(grade) && <div className="w-1.5 h-1.5 bg-white"></div>}
+                    </div>
+                    <span className={`text-sm tracking-wide transition-colors ${filterGrade.includes(grade) ? 'text-primary font-bold' : 'text-primary/60 font-light group-hover:text-primary'}`}>{grade}</span>
                   </label>
                 ))}
               </div>
             </div>
 
-            <div className="pt-6 border-t border-primary/5">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-bold uppercase tracking-widest text-primary">Origin</h3>
+            <div className="pt-8 border-t border-primary/5">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="font-display text-lg font-bold text-primary">Origin</h3>
+                {(filterOrigin.length > 0) && (
+                  <button onClick={() => setFilterOrigin([])} className="text-[9px] font-bold text-accent-gold uppercase tracking-widest hover:underline">Reset</button>
+                )}
               </div>
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {['USA (California)', 'Iran (Kerman)', 'Global'].map(origin => (
                   <label key={origin} className="flex items-center gap-3 cursor-pointer group">
-                    <input
-                      type="checkbox"
-                      checked={filterOrigin.includes(origin)}
-                      onChange={() => toggleFilter(origin, filterOrigin, setFilterOrigin)}
-                      className="size-5 rounded border-2 border-primary/20 text-primary focus:ring-0 focus:ring-offset-0 transition-all checked:bg-primary"
-                    />
-                    <span className="text-sm font-medium text-primary/80 group-hover:text-primary">{origin}</span>
+                    <div className={`w-3 h-3 border border-primary/30 flex items-center justify-center transition-all ${filterOrigin.includes(origin) ? 'bg-primary border-primary' : 'bg-transparent group-hover:border-primary'}`}>
+                      {filterOrigin.includes(origin) && <div className="w-1.5 h-1.5 bg-white"></div>}
+                    </div>
+                    <span className={`text-sm tracking-wide transition-colors ${filterOrigin.includes(origin) ? 'text-primary font-bold' : 'text-primary/60 font-light group-hover:text-primary'}`}>{origin}</span>
                   </label>
                 ))}
               </div>
-            </div>
-
-            <div className="p-6 bg-primary/5 rounded-xl border border-primary/10">
-              <p className="text-xs font-bold text-primary uppercase mb-2">Heritage Guarantee</p>
-              <p className="text-[11px] leading-relaxed text-primary/60">Every batch is verified for purity and origin-specific nutritional profiles by our internal lab.</p>
             </div>
           </div>
         </aside>
 
-        {/* Product Grid */}
+        {/* Product Grid - Waterfall */}
         <div className="flex-1">
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-            {filteredProducts.map(product => (
-              <div key={product.id} className="group relative bg-white dark:bg-stone-900 rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-stone-100 dark:border-stone-800">
-                <Link to={`/product/${product.id}`} className="block relative aspect-square overflow-hidden bg-[#f4f4f3] dark:bg-white/5">
-                  <img className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src={product.image} alt={product.name} />
-                  <div className="absolute top-4 left-4">
-                    <span className="px-3 py-1 bg-accent-gold text-white text-[10px] font-bold uppercase tracking-widest rounded-full">{product.grade} Grade</span>
+          {filteredProducts.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-10 gap-y-20">
+              {filteredProducts.map((product, index) => (
+                <Link
+                  to={`/product/${product.id}`}
+                  key={product.id}
+                  className="group block animate-fade-in-up"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <div className="relative aspect-[3/4] bg-background-paper overflow-hidden mb-8">
+                    {/* Image with Blending */}
+                    <div
+                      className="w-full h-full bg-center bg-contain bg-no-repeat mix-blend-multiply opacity-90 transition-transform duration-[1.5s] ease-out group-hover:scale-110"
+                      style={{ backgroundImage: `url("${product.image}")` }}
+                    ></div>
+
+                    {/* Hover Overlay */}
+                    <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/5 transition-colors duration-500"></div>
+                  </div>
+
+                  <div className="space-y-3 text-center">
+                    <p className="text-[10px] text-accent-gold uppercase tracking-[0.2em] font-bold">{product.origin}</p>
+                    <h3 className="font-display text-2xl text-primary group-hover:text-accent-gold transition-colors">{product.name}</h3>
+                    <p className="text-primary/50 font-light text-sm tracking-widest">${product.price.toFixed(2)} USD</p>
                   </div>
                 </Link>
-                <div className="p-6">
-                  <div className="flex justify-between items-start mb-2">
-                    <p className="text-[10px] font-extrabold text-accent-gold uppercase tracking-widest">Origin: {product.origin}</p>
-                    <p className="text-[10px] font-bold text-primary/40 uppercase">{product.weight}</p>
-                  </div>
-                  <h3 className="text-lg font-bold text-primary group-hover:text-accent-gold transition-colors mb-2">{product.name}</h3>
-                  <div className="flex items-center justify-between mt-4">
-                    <span className="text-xl font-black text-primary">${product.price.toFixed(2)}</span>
-                    <Link to={`/product/${product.id}`} className="flex items-center gap-2 px-4 py-2 bg-primary text-white text-xs font-bold uppercase rounded-lg hover:bg-primary-dark transition-colors">
-                      <span className="material-symbols-outlined text-sm">visibility</span>
-                      View
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {filteredProducts.length === 0 && (
-            <div className="py-20 text-center">
-              <h3 className="text-2xl font-display text-primary/40">No matching harvests found.</h3>
-              <button onClick={() => { setFilterGrade([]); setFilterOrigin([]); window.history.pushState({}, '', '#/shop'); }} className="mt-4 text-accent-gold uppercase font-bold tracking-widest text-xs">Clear all filters</button>
+              ))}
+            </div>
+          ) : (
+            <div className="py-32 text-center">
+              <h3 className="text-3xl font-display text-primary/20 italic mb-6">No harvests found.</h3>
+              <button onClick={() => { setFilterGrade([]); setFilterOrigin([]); window.history.pushState({}, '', '#/shop'); }} className="text-sm font-bold text-accent-gold uppercase tracking-widest border-b border-accent-gold pb-1 hover:text-primary hover:border-primary transition-colors">Clear Filters</button>
             </div>
           )}
         </div>

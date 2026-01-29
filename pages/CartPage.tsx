@@ -55,8 +55,9 @@ const CartPage: React.FC<Props> = ({ cart, removeFromCart, updateQuantity }) => 
       <div className="flex flex-col lg:flex-row gap-16">
         {/* Left Column: Cart Content & Checkout Form */}
         <div className="flex-1 space-y-12">
+
           {/* Free Shipping Progress */}
-          <div className="bg-white dark:bg-stone-900 p-6 rounded-xl border border-stone-100 dark:border-stone-800 shadow-sm">
+          <div className="bg-background-paper p-6 rounded-sm border border-primary/5 shadow-sm">
             <div className="flex justify-between items-center mb-4">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-accent-gold">local_shipping</span>
@@ -80,7 +81,7 @@ const CartPage: React.FC<Props> = ({ cart, removeFromCart, updateQuantity }) => 
           {/* Selection List */}
           <div>
             <h2 className="font-display text-3xl font-medium mb-8 text-primary">Your Selection</h2>
-            <div className="divide-y divide-stone-100 dark:divide-stone-800 bg-white dark:bg-stone-900 rounded-xl border border-stone-100 dark:border-stone-800 overflow-hidden">
+            <div className="divide-y divide-primary/5 bg-background-paper rounded-sm border border-primary/5 overflow-hidden">
               {cart.map(item => (
                 <div key={item.id} className="flex items-center gap-6 p-6 group">
                   <div className="relative overflow-hidden rounded-lg bg-stone-100 flex-shrink-0">
@@ -204,7 +205,7 @@ const CartPage: React.FC<Props> = ({ cart, removeFromCart, updateQuantity }) => 
             </div>
 
             {/* Trust Info */}
-            <div className="bg-stone-50 dark:bg-stone-800/50 p-6 rounded-xl border border-stone-100 dark:border-stone-800">
+            <div className="bg-background-light p-6 rounded-sm border border-primary/5">
               <div className="flex items-start gap-4">
                 <span className="material-symbols-outlined text-primary dark:text-accent-gold mt-1">verified_user</span>
                 <div>

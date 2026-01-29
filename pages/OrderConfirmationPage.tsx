@@ -10,14 +10,14 @@ const OrderConfirmationPage: React.FC = () => {
     }
 
     return (
-        <main className="min-h-screen bg-stone-50 dark:bg-stone-900 flex items-center justify-center p-6">
-            <div className="max-w-xl w-full bg-white dark:bg-stone-800 p-8 rounded-2xl shadow-xl animate-fade-in border border-stone-100 dark:border-stone-700">
-                <div className="text-center mb-8">
-                    <div className="size-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+        <main className="min-h-screen bg-background-light flex items-center justify-center p-6">
+            <div className="max-w-xl w-full bg-background-paper p-12 rounded-sm shadow-2xl animate-fade-in border border-primary/5">
+                <div className="text-center mb-12">
+                    <div className="size-20 bg-accent-gold/10 text-accent-gold rounded-full flex items-center justify-center mx-auto mb-6 border border-accent-gold/20">
                         <span className="material-symbols-outlined text-4xl">check_circle</span>
                     </div>
-                    <h1 className="text-3xl font-display font-medium text-primary dark:text-gray-100 mb-2">Order Confirmed!</h1>
-                    <p className="text-stone-500 text-sm">Thank you for your purchase, {order.customer_name}.</p>
+                    <h1 className="text-4xl font-display font-medium text-primary mb-4">Order Confirmed</h1>
+                    <p className="text-primary/60 font-light text-lg">Thank you for your purchase, {order.customer_name}.</p>
                 </div>
 
                 <div className="bg-stone-50 dark:bg-stone-900 rounded-xl p-6 mb-8 border border-stone-100 dark:border-stone-800">

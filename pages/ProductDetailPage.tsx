@@ -69,89 +69,90 @@ const ProductDetailPage: React.FC<Props> = ({ addToCart }) => {
   const nutritionalData = product.nutritional_info ? JSON.parse(product.nutritional_info) : {};
 
   return (
-    <main className="max-w-[1280px] mx-auto px-6 lg:px-10 py-8 min-h-screen">
+
+    <main className="max-w-[1440px] mx-auto px-6 lg:px-20 py-16 min-h-screen">
       {/* Breadcrumbs */}
-      <nav className="flex items-center gap-2 mb-8 text-sm text-stone-500 dark:text-stone-400">
-        <Link className="hover:text-primary" to="/">Home</Link>
-        <span className="material-symbols-outlined text-xs">chevron_right</span>
-        <Link className="hover:text-primary" to="/shop">Collections</Link>
-        <span className="material-symbols-outlined text-xs">chevron_right</span>
-        <span className="text-stone-800 dark:text-white font-medium">{product.name}</span>
+      <nav className="flex items-center gap-3 mb-12 text-[10px] font-bold uppercase tracking-[0.2em] text-primary/40">
+        <Link className="hover:text-primary transition-colors" to="/">Home</Link>
+        <span className="material-symbols-outlined text-[10px]">chevron_right</span>
+        <Link className="hover:text-primary transition-colors" to="/shop">Collections</Link>
+        <span className="material-symbols-outlined text-[10px]">chevron_right</span>
+        <span className="text-primary font-black">{product.name}</span>
       </nav>
 
-      <div className="flex flex-col lg:flex-row gap-16 mb-20">
+      <div className="flex flex-col lg:flex-row gap-20 mb-32">
         {/* Left Column: Image Gallery */}
-        <div className="flex-1 space-y-4">
-          <div className="relative group aspect-[4/5] bg-stone-200 dark:bg-white/5 rounded-xl overflow-hidden shadow-sm">
-            <div className="w-full h-full bg-center bg-no-repeat bg-cover transform transition-transform duration-700 group-hover:scale-105" style={{ backgroundImage: `url("${product.image}")` }}></div>
+        <div className="flex-1 space-y-6">
+          <div className="relative group aspect-[4/5] bg-background-paper rounded-sm overflow-hidden animate-fade-in">
+            <div className="w-full h-full bg-center bg-no-repeat bg-contain mix-blend-multiply opacity-90 transform transition-transform duration-[2s] ease-out group-hover:scale-105" style={{ backgroundImage: `url("${product.image}")` }}></div>
           </div>
           <div className="grid grid-cols-4 gap-4">
-            <div className="aspect-square bg-center bg-cover rounded-lg cursor-pointer border-2 border-primary" style={{ backgroundImage: `url("${product.image}")` }}></div>
-            <div className="aspect-square bg-[#f2f3f2] dark:bg-white/5 rounded-lg flex items-center justify-center cursor-pointer border-2 border-transparent">
-              <span className="material-symbols-outlined text-3xl opacity-40">play_circle</span>
+            {/* Thumbnail placeholders - naturally would iterate over images if we had multiple */}
+            <div className="aspect-square bg-background-paper bg-center bg-contain bg-no-repeat mix-blend-multiply cursor-pointer border border-primary/20 hover:border-accent-gold transition-colors" style={{ backgroundImage: `url("${product.image}")` }}></div>
+            <div className="aspect-square bg-background-paper rounded-sm flex items-center justify-center cursor-pointer border border-transparent hover:border-primary/10 transition-colors group">
+              <span className="material-symbols-outlined text-4xl text-primary/20 group-hover:text-accent-gold transition-colors">play_circle</span>
             </div>
           </div>
         </div>
 
         {/* Right Column: Product Info */}
-        <div className="flex-1 flex flex-col pt-4">
-          <div className="mb-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-bold tracking-widest uppercase mb-4">
+        <div className="flex-1 flex flex-col pt-8 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+          <div className="mb-10">
+            <div className="inline-flex items-center gap-2 px-3 py-1 border border-accent-gold/30 text-accent-gold rounded-full text-[9px] font-extrabold tracking-widest uppercase mb-6">
               <span className="material-symbols-outlined text-sm">verified</span>
-              Export Quality Standard
+              {product.grade} Grade Export Quality
             </div>
-            <h1 className="text-4xl font-bold leading-tight mb-2 tracking-tight text-primary">{product.name}</h1>
-            <div className="flex items-center gap-4 mb-6">
-              <div className="flex text-amber-500">
-                {[1, 2, 3, 4, 5].map(i => <span key={i} className="material-symbols-outlined fill-1">star</span>)}
+            <h1 className="font-display text-5xl lg:text-6xl font-black leading-[0.9] mb-4 tracking-tight text-primary">{product.name}</h1>
+            <div className="flex items-center gap-4 mb-8">
+              <div className="flex text-accent-gold">
+                {[1, 2, 3, 4, 5].map(i => <span key={i} className="material-symbols-outlined fill-1 !text-lg">star</span>)}
               </div>
-              <span className="text-sm text-stone-400">(128 reviews)</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-primary/40">(128 reviews)</span>
             </div>
-            <p className="text-stone-500 dark:text-stone-400 text-lg leading-relaxed max-w-lg">
-              {product.description} Hand-sorted and processed in our climate-controlled heritage facilities to preserve essential oils and crunch.
+            <p className="font-sans text-primary/60 text-lg leading-loose font-light max-w-lg">
+              {product.description} Sourced directly from our heritage orchards. Hand-sorted and processed in climate-controlled facilities to preserve essential oils, crunch, and the distinct flavor profile of the {product.origin} terroir.
             </p>
           </div>
 
-          <div className="space-y-8">
+          <div className="space-y-10">
             {/* Weight Selector */}
             <div>
-              <label className="block text-sm font-bold uppercase tracking-wider text-stone-800 dark:text-white mb-4">Select Weight</label>
-              <div className="flex flex-wrap gap-3">
-                <button className="px-6 py-3 border-2 border-primary bg-primary text-white rounded-xl font-medium transition-all">{product.weight}</button>
-                <button className="px-6 py-3 border-2 border-stone-200 dark:border-white/10 hover:border-primary/50 rounded-xl font-medium transition-all text-stone-400">1.5kg Bulk</button>
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary mb-4">Select Weight</p>
+              <div className="flex flex-wrap gap-4 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+                <button className="px-8 py-4 border border-primary bg-primary text-white text-xs font-bold uppercase tracking-widest transition-all shadow-xl shadow-primary/10">{product.weight}</button>
+                <button className="px-8 py-4 border border-primary/10 hover:border-primary/40 text-primary/40 hover:text-primary text-xs font-bold uppercase tracking-widest transition-all">1.5kg Bulk</button>
               </div>
             </div>
 
             {/* Quantity & Price */}
-            <div className="flex items-end justify-between border-t border-b border-stone-100 dark:border-white/10 py-8">
+            <div className="flex items-end justify-between border-t border-b border-primary/5 py-10 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
               <div>
-                <label className="block text-sm font-bold uppercase tracking-wider mb-4">Quantity</label>
-                <div className="flex items-center bg-[#f2f3f2] dark:bg-white/5 rounded-xl w-fit">
-                  <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="size-12 flex items-center justify-center hover:text-primary transition-colors">
-                    <span className="material-symbols-outlined">remove</span>
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary mb-4">Quantity</p>
+                <div className="flex items-center border border-primary/10 rounded-full w-fit px-2">
+                  <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="size-10 flex items-center justify-center text-primary/40 hover:text-primary transition-colors">
+                    <span className="material-symbols-outlined !text-lg">remove</span>
                   </button>
-                  <span className="w-12 text-center font-bold text-lg">{quantity}</span>
-                  <button onClick={() => setQuantity(q => q + 1)} className="size-12 flex items-center justify-center hover:text-primary transition-colors">
-                    <span className="material-symbols-outlined">add</span>
+                  <span className="w-10 text-center font-display font-bold text-xl text-primary">{quantity}</span>
+                  <button onClick={() => setQuantity(q => q + 1)} className="size-10 flex items-center justify-center text-primary/40 hover:text-primary transition-colors">
+                    <span className="material-symbols-outlined !text-lg">add</span>
                   </button>
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-sm text-stone-400 uppercase font-bold tracking-widest mb-1">Total Price</p>
-                <p className="text-4xl font-bold text-primary">${(product.price * quantity).toFixed(2)}</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/40 mb-2">Total</p>
+                <p className="font-display text-4xl font-black text-primary">${(product.price * quantity).toFixed(2)}</p>
               </div>
             </div>
 
             {/* CTA Actions */}
-            <div className="flex gap-4">
+            <div className="flex gap-6 animate-fade-in-up" style={{ animationDelay: '0.5s' }}>
               <button
                 onClick={() => addToCart(product, quantity)}
-                className="flex-1 bg-primary hover:bg-primary-dark text-white font-bold py-5 rounded-xl transition-all flex items-center justify-center gap-3 text-lg shadow-lg shadow-primary/20"
+                className="flex-1 bg-primary hover:bg-black text-white py-5 px-8 transition-all flex items-center justify-center gap-3 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.2)] hover:shadow-[0_20px_40px_-5px_rgba(0,0,0,0.3)] hover:-translate-y-1"
               >
-                <span className="material-symbols-outlined">shopping_cart</span>
-                Add to Cart
+                <span className="text-xs font-bold uppercase tracking-[0.2em]">Add to Cart</span>
               </button>
-              <button onClick={toggleFavorite} className={`size-16 border-2 hover:border-primary hover:text-primary rounded-xl flex items-center justify-center transition-all group ${isFavorite ? 'border-primary text-primary bg-primary/10' : 'border-stone-100 dark:border-white/10'}`}>
+              <button onClick={toggleFavorite} className={`px-6 border hover:border-accent-gold hover:text-accent-gold flex items-center justify-center transition-all group ${isFavorite ? 'border-accent-gold text-accent-gold bg-accent-gold/5' : 'border-primary/10 text-primary/30'}`}>
                 <span className={`material-symbols-outlined group-hover:scale-110 transition-transform ${isFavorite ? 'fill-1' : ''}`}>favorite</span>
               </button>
             </div>
@@ -160,73 +161,76 @@ const ProductDetailPage: React.FC<Props> = ({ addToCart }) => {
       </div>
 
       {/* Tabbed Content */}
-      <div className="border-t border-stone-100 dark:border-white/10 pt-12">
-        <div className="flex gap-12 border-b border-stone-100 dark:border-white/10 mb-8 overflow-x-auto scrollbar-hide">
+      <div className="border-t border-primary/5 pt-16 animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
+        <div className="flex justify-center gap-16 mb-16 overflow-x-auto scrollbar-hide">
           {['origin', 'nutritional', 'sustainability'].map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`pb-4 text-lg font-bold border-b-2 transition-all uppercase tracking-widest text-sm whitespace-nowrap ${activeTab === tab ? 'border-primary text-primary' : 'border-transparent text-stone-400 hover:text-stone-800'}`}
+              className={`pb-2 text-xs font-bold uppercase tracking-[0.2em] border-b-[3px] transition-all whitespace-nowrap ${activeTab === tab ? 'border-accent-gold text-primary' : 'border-transparent text-primary/30 hover:text-primary'}`}
             >
-              {tab === 'origin' ? 'Origin Story' : tab === 'nutritional' ? 'Nutritional Profile' : 'Sustainability'}
+              {tab === 'origin' ? 'Origin Story' : tab === 'nutritional' ? 'Nutrition' : 'Sustainability'}
             </button>
           ))}
         </div>
 
         {activeTab === 'origin' && (
-          <div className="grid lg:grid-cols-2 gap-16 items-start animate-fade-in">
-            <div className="space-y-6">
-              <h3 className="text-2xl font-bold italic font-display text-primary">A Legacy of Export Excellence</h3>
-              <p className="text-stone-500 leading-relaxed text-lg">
+          <div className="grid lg:grid-cols-2 gap-20 items-center animate-fade-in">
+            <div className="space-y-8 order-2 lg:order-1">
+              <h3 className="text-4xl font-display font-bold text-primary">A Legacy of Export Excellence</h3>
+              <p className="text-primary/60 leading-loose text-lg font-light">
                 {product.sustainability_info || `Sourced from the heart of the ${product.origin} region. Our orchards have been cultivated for generations, ensuring the perfect balance of soil nutrients and climate for this specific variety.`}
               </p>
-              <p className="text-stone-500 leading-relaxed text-lg">
-                Each nut is sorted by hand, ensuring that only the "{product.grade}" grade—those with perfect shape, size, and skin integrity—make it into our premium packaging.
-              </p>
-              <div className="flex gap-8 pt-4">
+              <div className="grid grid-cols-2 gap-8 pt-6 border-t border-primary/5">
                 <div>
-                  <p className="text-3xl font-bold text-primary">40+</p>
-                  <p className="text-sm text-stone-400 font-medium">Years of Heritage</p>
+                  <p className="text-4xl font-display font-bold text-accent-gold">40+</p>
+                  <p className="text-[10px] uppercase tracking-widest text-primary/40 font-bold mt-1">Years of Heritage</p>
                 </div>
                 <div>
-                  <p className="text-3xl font-bold text-primary">12</p>
-                  <p className="text-sm text-stone-400 font-medium">Quality Checks</p>
+                  <p className="text-4xl font-display font-bold text-accent-gold">100%</p>
+                  <p className="text-[10px] uppercase tracking-widest text-primary/40 font-bold mt-1">Ethically Sourced</p>
                 </div>
               </div>
             </div>
-            <div className="relative rounded-2xl overflow-hidden aspect-video shadow-2xl">
-              <div className="absolute inset-0 bg-primary/20 mix-blend-multiply"></div>
-              <div className="w-full h-full bg-center bg-cover" style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuBe9XQoCjsQeaVATd0FcCpMc_UxBf6G8dwAmdU1VLDfxEXcqdKgzCx-S9xAyxqJGX4UqqjSUNpyGwvE33HOhD0G9efdTVVTbcrXAkh77XH7Dz3cRmd28vN_T40lNrGog_MszAMlx85PVDc43A1ZPXozv61w3zJHXn0LIBLFk8U_ZoRhRC1EfyQpLohJJc6yZP4fOs70eJX9TxWJqf_FR6Gw1CXf90bVv3t6CNq6gWMeQzD8mAG3k-scuGO3jBqRr8qO4hjFHHdUXVU")' }}></div>
-              <div className="absolute bottom-6 left-6 text-white">
-                <p className="text-sm font-bold uppercase tracking-widest mb-1">Harvest Location</p>
-                <p className="text-xl font-medium">{product.origin}</p>
+            <div className="relative rounded-sm overflow-hidden aspect-[4/3] order-1 lg:order-2">
+              <div className="absolute inset-0 bg-primary/10 mix-blend-multiply"></div>
+              <div className="w-full h-full bg-center bg-cover grayscale hover:grayscale-0 transition-all duration-[1.5s]" style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuBe9XQoCjsQeaVATd0FcCpMc_UxBf6G8dwAmdU1VLDfxEXcqdKgzCx-S9xAyxqJGX4UqqjSUNpyGwvE33HOhD0G9efdTVVTbcrXAkh77XH7Dz3cRmd28vN_T40lNrGog_MszAMlx85PVDc43A1ZPXozv61w3zJHXn0LIBLFk8U_ZoRhRC1EfyQpLohJJc6yZP4fOs70eJX9TxWJqf_FR6Gw1CXf90bVv3t6CNq6gWMeQzD8mAG3k-scuGO3jBqRr8qO4hjFHHdUXVU")' }}></div>
+              <div className="absolute bottom-8 left-8 text-white">
+                <p className="text-[10px] font-bold uppercase tracking-widest mb-2 opacity-80">Harvest Region</p>
+                <p className="font-display text-3xl font-medium">{product.origin}</p>
               </div>
             </div>
           </div>
         )}
 
         {activeTab === 'nutritional' && (
-          <div className="p-10 bg-accent-gold/5 rounded-3xl border border-accent-gold/20 animate-fade-in">
-            <h3 className="text-xl font-bold mb-8 flex items-center gap-2 text-primary">
-              <span className="material-symbols-outlined">nutrition</span>
-              Nutritional Profile <span className="text-sm font-normal text-stone-400">(per 100g serving)</span>
+          <div className="max-w-4xl mx-auto p-12 bg-background-paper border border-primary/5 animate-fade-in">
+            <h3 className="text-2xl font-display font-bold mb-12 text-center text-primary">
+              Nutritional Profile <span className="text-lg font-sans font-normal text-primary/40 block mt-2 text-sm tracking-widest uppercase">(Per 100g Serving)</span>
             </h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-12 text-center">
               {Object.entries(nutritionalData).length > 0 ? (
                 Object.entries(nutritionalData).map(([key, value]) => (
-                  <div key={key} className="space-y-2">
-                    <p className="text-xs font-bold uppercase text-stone-400">{key}</p>
-                    <p className="text-2xl font-bold text-stone-800">{String(value)}</p>
-                    <div className="h-1 bg-stone-200 rounded-full overflow-hidden">
-                      {/* Random width for demo since we don't have pct data in simple string map, or we could add it to JSON */}
-                      <div className="h-full bg-primary" style={{ width: '60%' }}></div>
-                    </div>
+                  <div key={key} className="space-y-4 group">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/40 group-hover:text-accent-gold transition-colors">{key}</p>
+                    <p className="text-4xl font-display font-bold text-primary">{String(value)}</p>
+                    <div className="w-8 h-[1px] bg-primary/10 mx-auto group-hover:w-16 transition-all duration-500"></div>
                   </div>
                 ))
               ) : (
-                <p>No nutritional data available.</p>
+                <p className="col-span-4 text-center text-primary/40 italic">No nutritional data available.</p>
               )}
             </div>
+          </div>
+        )}
+
+        {activeTab === 'sustainability' && (
+          <div className="max-w-3xl mx-auto text-center animate-fade-in space-y-8">
+            <span className="material-symbols-outlined !text-6xl text-accent-gold">eco</span>
+            <h3 className="font-display text-3xl font-bold text-primary">Committed to the Earth</h3>
+            <p className="leading-loose text-primary/60 font-light text-lg">
+              Our farming partners utilize advanced drip irrigation techniques to minimize water usage by up to 30%. Every shell is repurposed for livestock bedding or renewable energy, ensuring a zero-waste harvest cycle.
+            </p>
           </div>
         )}
       </div>

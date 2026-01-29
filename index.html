@@ -1,30 +1,47 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nutmunch | Premium Almonds & Exports</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,aspect-ratio"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&family=Manrope:wght@300;400;500;600;700;800&family=Epilogue:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Lato:wght@300;400;700;900&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
     <script>
         tailwind.config = {
             darkMode: "class",
             theme: {
                 extend: {
                     colors: {
-                        "primary": "#2d5339",
-                        "primary-dark": "#1d3625",
-                        "accent-gold": "#C7A15E",
-                        "background-light": "#f7f5f3",
-                        "background-dark": "#121612",
+                        "primary": "#1a1a1a",
+                        "primary-dark": "#000000",
+                        "accent-gold": "#C6A87C",
+                        "background-light": "#FCF9F1",
+                        "background-paper": "#FAF9F6",
+                        "background-dark": "#111",
                         "border-soft": "#e8e4e1",
                     },
                     fontFamily: {
-                        "display": ["Noto Serif", "serif"],
-                        "sans": ["Manrope", "sans-serif"],
-                        "epilogue": ["Epilogue", "sans-serif"],
+                        "display": ["Playfair Display", "serif"],
+                        "sans": ["Lato", "sans-serif"],
+                    },
+                    animation: {
+                        "fade-in": "fadeIn 0.8s ease-out forwards",
+                        "fade-in-up": "fadeInUp 0.8s ease-out forwards",
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            "0%": { opacity: "0" },
+                            "100%": { opacity: "1" },
+                        },
+                        fadeInUp: {
+                            "0%": { opacity: "0", transform: "translateY(20px)" },
+                            "100%": { opacity: "1", transform: "translateY(0)" },
+                        },
                     },
                 },
             },
@@ -34,15 +51,17 @@
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
         }
+
         .scrollbar-hide::-webkit-scrollbar {
             display: none;
         }
+
         .scrollbar-hide {
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
     </style>
-<script type="importmap">
+    <script type="importmap">
 {
   "imports": {
     "react/": "https://esm.sh/react@^19.2.3/",
@@ -52,10 +71,13 @@
   }
 }
 </script>
-<link rel="stylesheet" href="/index.css">
+    <link rel="stylesheet" href="/index.css">
 </head>
-<body class="bg-background-light dark:bg-background-dark font-sans text-stone-800 dark:text-stone-200 antialiased overflow-x-hidden">
+
+<body
+    class="bg-background-light dark:bg-background-dark font-sans text-stone-800 dark:text-stone-200 antialiased overflow-x-hidden">
     <div id="root"></div>
-<script type="module" src="/index.tsx"></script>
+    <script type="module" src="/index.tsx"></script>
 </body>
+
 </html>

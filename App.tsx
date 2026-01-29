@@ -33,9 +33,9 @@ const Header: React.FC<{ cartCount: number }> = ({ cartCount }) => {
   }, []);
 
   return (
-    <header className={`sticky top-0 z-50 w-full transition-all duration-300 ${isScrolled ? 'bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md shadow-sm' : 'bg-transparent'}`}>
-      {/* Utility Bar */}
-      <div className="hidden md:flex justify-between items-center px-12 py-2 border-b border-border-soft dark:border-stone-800 text-[10px] tracking-[0.2em] uppercase font-medium text-stone-500">
+    <header className={`sticky top-0 z-50 w-full transition-all duration-500 ${isScrolled ? 'bg-background-light/95 backdrop-blur-md shadow-sm' : 'bg-transparent'}`}>
+      {/* Utility Bar - Minimal */}
+      <div className="hidden md:flex justify-between items-center px-12 py-3 text-[10px] tracking-[0.2em] uppercase font-bold text-primary/40">
         <div className="flex gap-6">
           <span className="cursor-pointer hover:text-accent-gold transition-colors">Global Shipping</span>
           <span className="cursor-pointer hover:text-accent-gold transition-colors">Wholesale Portal</span>
@@ -51,56 +51,60 @@ const Header: React.FC<{ cartCount: number }> = ({ cartCount }) => {
 
       {/* Main Nav */}
       <div className="px-6 md:px-12 py-5 flex items-center justify-between">
-        <div className="flex-1 hidden lg:flex gap-10 text-[11px] tracking-[0.15em] uppercase font-semibold">
-          <Link to="/shop" className="hover:text-primary transition-colors">Collections</Link>
-          <Link to="/#legacy" className="hover:text-primary transition-colors">Our Heritage</Link>
-          <Link to="/shop?grade=Reserve" className="hover:text-primary transition-colors">Export Services</Link>
+        <div className="flex-1 hidden lg:flex gap-12 text-[11px] tracking-[0.15em] uppercase font-semibold text-primary/80">
+          <Link to="/shop" className="hover:text-primary transition-colors hover:line-through decoration-accent-gold">Collections</Link>
+          <Link to="/#legacy" className="hover:text-primary transition-colors hover:line-through decoration-accent-gold">Our Heritage</Link>
+          <Link to="/shop?grade=Reserve" className="hover:text-primary transition-colors hover:line-through decoration-accent-gold">Export Services</Link>
         </div>
 
         <Link to="/" className="flex flex-col items-center">
-          <h1 className="font-display text-2xl md:text-3xl font-bold tracking-tight text-primary dark:text-white uppercase">NUTMUNCH</h1>
-          <span className="text-[9px] tracking-[0.4em] uppercase text-accent-gold font-bold">Est. 1984</span>
+          <h1 className="font-display text-3xl md:text-4xl font-black tracking-tight text-primary uppercase">NUTMUNCH</h1>
+          <span className="text-[9px] tracking-[0.4em] uppercase text-accent-gold font-bold mt-1">Est. 1984</span>
         </Link>
 
-        <div className="flex-1 flex justify-end items-center gap-6">
-          <form onSubmit={handleSearch} className="hidden sm:flex items-center border-b border-stone-300 dark:border-stone-700 pb-1">
-            <span className="material-symbols-outlined text-stone-400 !text-xl">search</span>
+        <div className="flex-1 flex justify-end items-center gap-8">
+          <form onSubmit={handleSearch} className="hidden sm:flex items-center border-b border-primary/20 pb-1 hover:border-accent-gold transition-colors group">
+            <span className="material-symbols-outlined text-primary/40 !text-lg group-hover:text-accent-gold transition-colors">search</span>
             <input
-              className="bg-transparent border-none focus:ring-0 text-sm placeholder:text-stone-400 w-32 lg:w-48 py-0"
-              placeholder="Search collection"
+              className="bg-transparent border-none focus:ring-0 text-sm placeholder:text-primary/30 text-primary w-24 lg:w-32 py-0 font-light"
+              placeholder="Search..."
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </form>
-          <div className="flex items-center gap-4">
-            <Link to="/cart" className="relative hover:text-primary transition-colors">
-              <span className="material-symbols-outlined !text-2xl">shopping_bag</span>
+          <div className="flex items-center gap-6">
+            <button className="relative hover:text-accent-gold transition-colors text-primary">
+              <span className="material-symbols-outlined !text-xl">favorite</span>
+            </button>
+            <Link to="/cart" className="relative hover:text-accent-gold transition-colors text-primary">
+              <span className="material-symbols-outlined !text-xl">shopping_bag</span>
               {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-accent-gold text-white text-[8px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
+                <span className="absolute -top-2 -right-2 bg-accent-gold text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold shadow-sm">
                   {cartCount}
                 </span>
               )}
             </Link>
             <button className="lg:hidden" onClick={() => setIsMobileMenuOpen(true)}>
-              <span className="material-symbols-outlined !text-2xl">menu</span>
+              <span className="material-symbols-outlined !text-2xl text-primary">menu</span>
             </button>
           </div>
         </div>
       </div>
 
       {/* Mobile Menu Overlay */}
-      <div className={`fixed inset-0 bg-background-light dark:bg-stone-900 z-[60] transition-transform duration-300 ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-        <div className="flex justify-end p-8">
+      <div className={`fixed inset-0 bg-background-light z-[60] transition-transform duration-500 ease-out ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+        <div className="flex justify-between items-center p-8 border-b border-primary/10">
+          <span className="font-display text-xl font-bold text-primary">NUTMUNCH</span>
           <button onClick={() => setIsMobileMenuOpen(false)}>
-            <span className="material-symbols-outlined !text-3xl">close</span>
+            <span className="material-symbols-outlined !text-3xl text-primary">close</span>
           </button>
         </div>
-        <div className="flex flex-col items-center gap-8 text-2xl font-display uppercase tracking-widest">
-          <Link to="/shop" onClick={() => setIsMobileMenuOpen(false)}>Collections</Link>
-          <Link to="/#legacy" onClick={() => setIsMobileMenuOpen(false)}>Heritage</Link>
-          <Link to="/cart" onClick={() => setIsMobileMenuOpen(false)}>Cart ({cartCount})</Link>
-          <a href="#" onClick={(e) => { e.preventDefault(); alert("Account portal coming soon"); setIsMobileMenuOpen(false); }}>Account</a>
+        <div className="flex flex-col items-center justify-center h-full gap-10 text-3xl font-display text-primary">
+          <Link to="/shop" onClick={() => setIsMobileMenuOpen(false)} className="hover:italic transition-all">Collections</Link>
+          <Link to="/#legacy" onClick={() => setIsMobileMenuOpen(false)} className="hover:italic transition-all">Heritage</Link>
+          <Link to="/cart" onClick={() => setIsMobileMenuOpen(false)} className="hover:italic transition-all">Cart ({cartCount})</Link>
+          <a href="#" onClick={(e) => { e.preventDefault(); alert("Account portal coming soon"); setIsMobileMenuOpen(false); }} className="hover:italic transition-all">Account</a>
         </div>
       </div>
     </header>
@@ -108,69 +112,47 @@ const Header: React.FC<{ cartCount: number }> = ({ cartCount }) => {
 };
 
 const Footer: React.FC = () => (
-  <footer className="bg-background-light dark:bg-background-dark pt-20 pb-10 border-t border-border-soft dark:border-stone-800">
-    <div className="px-6 md:px-12 max-w-[1400px] mx-auto grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-12 mb-20">
-      <div className="lg:col-span-2">
-        <h2 className="font-display text-2xl font-bold tracking-tight text-primary dark:text-white mb-6 uppercase">NUTMUNCH</h2>
-        <p className="text-stone-500 text-sm leading-relaxed mb-8 max-w-xs">
-          Supplying the world's most discerning palates with the finest almonds and artisanal nut blends since 1984.
+  <footer className="bg-background-paper pt-24 pb-12 border-t border-primary/5">
+    <div className="max-w-[1440px] mx-auto px-6 lg:px-20 grid grid-cols-1 md:grid-cols-4 gap-12 lg:gap-24 mb-24">
+      <div className="md:col-span-2 space-y-8">
+        <h2 className="font-display text-4xl text-primary font-bold tracking-tight">NUTMUNCH</h2>
+        <p className="text-primary/60 max-w-sm text-lg leading-relaxed font-light">
+          Purveyors of the world's most discerning palates with the finest almonds and artisanal nut blends. Cultivating heritage since 1984.
         </p>
-        <div className="flex gap-4">
-          <a className="w-10 h-10 border border-stone-300 dark:border-stone-700 flex items-center justify-center rounded-full hover:border-accent-gold transition-colors" href="#">
-            <span className="material-symbols-outlined !text-lg">alternate_email</span>
-          </a>
-          <a className="w-10 h-10 border border-stone-300 dark:border-stone-700 flex items-center justify-center rounded-full hover:border-accent-gold transition-colors" href="#">
-            <span className="material-symbols-outlined !text-lg">public</span>
-          </a>
+        <div className="flex gap-4 opacity-50 hover:opacity-100 transition-opacity">
+          <div className="w-10 h-10 rounded-full border border-primary/20 flex items-center justify-center text-primary cursor-pointer hover:bg-primary hover:text-white transition-all"><span className="text-[10px] font-bold">IG</span></div>
+          <div className="w-10 h-10 rounded-full border border-primary/20 flex items-center justify-center text-primary cursor-pointer hover:bg-primary hover:text-white transition-all"><span className="text-[10px] font-bold">FB</span></div>
+          <div className="w-10 h-10 rounded-full border border-primary/20 flex items-center justify-center text-primary cursor-pointer hover:bg-primary hover:text-white transition-all"><span className="text-[10px] font-bold">LI</span></div>
         </div>
       </div>
-      <div>
-        <h4 className="text-[11px] font-bold tracking-[0.2em] uppercase text-stone-400 mb-6">Shop</h4>
-        <ul className="flex flex-col gap-4 text-sm text-stone-600 dark:text-stone-400">
-          <li><Link className="hover:text-primary transition-colors" to="/shop?category=Raw">Raw Collection</Link></li>
-          <li><Link className="hover:text-primary transition-colors" to="/shop?category=Roasted">Gourmet Roasted</Link></li>
-          <li><Link className="hover:text-primary transition-colors" to="/shop?category=Confection">Specialty Blends</Link></li>
-          <li><Link className="hover:text-primary transition-colors" to="/shop">Gift Sets</Link></li>
+
+      <div className="space-y-6">
+        <h4 className="font-display text-xl text-primary">Collection</h4>
+        <ul className="space-y-4 text-primary/60 font-light">
+          <li><Link to="/shop" className="hover:text-primary transition-colors hover:translate-x-1 inline-block duration-300">All Products</Link></li>
+          <li><Link to="/shop?category=Raw" className="hover:text-primary transition-colors hover:translate-x-1 inline-block duration-300">Raw Kernels</Link></li>
+          <li><Link to="/shop?category=Roasted" className="hover:text-primary transition-colors hover:translate-x-1 inline-block duration-300">Roasted & Salted</Link></li>
+          <li><Link to="/shop?grade=Premium" className="hover:text-primary transition-colors hover:translate-x-1 inline-block duration-300">Premium Grade</Link></li>
         </ul>
       </div>
-      <div>
-        <h4 className="text-[11px] font-bold tracking-[0.2em] uppercase text-stone-400 mb-6">Company</h4>
-        <ul className="flex flex-col gap-4 text-sm text-stone-600 dark:text-stone-400">
-          <li><Link className="hover:text-primary transition-colors" to="/#legacy">Our Heritage</Link></li>
-          <li><a className="hover:text-primary transition-colors" href="#" onClick={(e) => { e.preventDefault(); alert("Sustainability report coming soon."); }}>Sustainability</a></li>
-          <li><a className="hover:text-primary transition-colors" href="#" onClick={(e) => { e.preventDefault(); alert("We are hiring! Check back later."); }}>Careers</a></li>
-          <li><a className="hover:text-primary transition-colors" href="#" onClick={(e) => { e.preventDefault(); alert("Press kit coming soon."); }}>Press</a></li>
+
+      <div className="space-y-6">
+        <h4 className="font-display text-xl text-primary">Company</h4>
+        <ul className="space-y-4 text-primary/60 font-light">
+          <li><a href="#" className="hover:text-primary transition-colors hover:translate-x-1 inline-block duration-300">Our Heritage</a></li>
+          <li><a href="#" className="hover:text-primary transition-colors hover:translate-x-1 inline-block duration-300">Sustainability</a></li>
+          <li><a href="#" className="hover:text-primary transition-colors hover:translate-x-1 inline-block duration-300">Contact</a></li>
+          <li><a href="#" className="hover:text-primary transition-colors hover:translate-x-1 inline-block duration-300">Wholesale</a></li>
         </ul>
-      </div>
-      <div>
-        <h4 className="text-[11px] font-bold tracking-[0.2em] uppercase text-stone-400 mb-6">Support</h4>
-        <ul className="flex flex-col gap-4 text-sm text-stone-600 dark:text-stone-400">
-          <li><a className="hover:text-primary transition-colors" href="#" onClick={(e) => { e.preventDefault(); alert("Shipping info coming soon."); }}>Shipping & Returns</a></li>
-          <li><a className="hover:text-primary transition-colors" href="#" onClick={(e) => { e.preventDefault(); alert("Tracking feature coming soon."); }}>Track Order</a></li>
-          <li><a className="hover:text-primary transition-colors" href="#" onClick={(e) => { e.preventDefault(); alert("Please email wholesale@nutmunch.com"); }}>Wholesale Inquiry</a></li>
-          <li><a className="hover:text-primary transition-colors" href="#" onClick={(e) => { e.preventDefault(); alert("Privacy Policy coming soon."); }}>Privacy Policy</a></li>
-        </ul>
-      </div>
-      <div className="flex flex-col justify-between">
-        <div>
-          <h4 className="text-[11px] font-bold tracking-[0.2em] uppercase text-stone-400 mb-6">Contact</h4>
-          <p className="text-sm text-stone-600 dark:text-stone-400">Global HQ: Modesto, California</p>
-          <p className="text-sm text-stone-600 dark:text-stone-400 mt-2">+1 (800) 555-ALMD</p>
-        </div>
       </div>
     </div>
-    <div className="px-6 md:px-12 max-w-[1400px] mx-auto pt-10 border-t border-border-soft dark:border-stone-800 flex flex-col md:flex-row justify-between items-center gap-6">
-      <p className="text-[10px] uppercase tracking-widest text-stone-400 font-medium">© 2024 Nutmunch. All Rights Reserved.</p>
-      <div className="flex gap-8 items-center opacity-40">
-        <span className="material-symbols-outlined !text-3xl">credit_card</span>
-        {/* Corrected 'class' to 'className' for account_balance_wallet icon */}
-        <span className="material-symbols-outlined !text-3xl">account_balance_wallet</span>
-        {/* Corrected 'class' to 'className' for payments icon */}
-        <span className="material-symbols-outlined !text-3xl">payments</span>
+
+    <div className="max-w-[1440px] mx-auto px-6 lg:px-20 flex flex-col md:flex-row justify-between items-center pt-8 border-t border-primary/5 text-xs text-primary/30 uppercase tracking-widest">
+      <p>&copy; 2024 Nutmunch Global. All rights reserved.</p>
+      <div className="flex gap-8 mt-4 md:mt-0">
+        <a href="#" className="hover:text-primary">Privacy Policy</a>
+        <a href="#" className="hover:text-primary">Terms of Service</a>
       </div>
-    </div>
-    <div className="text-[10px] text-center text-red-500 font-bold opacity-50 pb-4">
-      DEBUG: API_URL = {import.meta.env.VITE_API_URL || 'Using Localhost Fallback'}
     </div>
   </footer>
 );
