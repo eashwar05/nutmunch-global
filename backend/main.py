@@ -11,6 +11,17 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
+# Run migration on startup to ensure DB is up to date
+@app.on_event("startup")
+def startup_event():
+    from migrate_db import migrate
+    from update_products import update_data
+    try:
+        migrate()
+        update_data()
+    except Exception as e:
+        print(f"Startup tasks failed: {e}")
+
 # CORS
 origins = [
     "http://localhost:3000",

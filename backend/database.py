@@ -4,11 +4,16 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-# Load .env.local from the parent directory
-# We use override=True to ensure the file takes precedence
-load_dotenv(dotenv_path="../.env.local", override=True)
+from pathlib import Path
+
+# Load .env.local from the project root (parent of backend/)
+# This ensures it works regardless of where the script is run from
+BASE_DIR = Path(__file__).resolve().parent.parent
+env_path = BASE_DIR / ".env.local"
+load_dotenv(dotenv_path=env_path, override=True)
 
 # Get the Database URL from env, defaulting to local sqlite
+# If Env loading works, this should be the Neon URL
 SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./sql_app.db")
 
 # Fix for SQLAlchemy 1.4+ which deprecated postgres://
