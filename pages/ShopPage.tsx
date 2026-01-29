@@ -10,7 +10,9 @@ const ShopPage: React.FC = () => {
   const searchParams = new URLSearchParams(location.search);
   const categoryParam = searchParams.get('category');
   const gradeParam = searchParams.get('grade');
+  /* Removed duplicates */
   const originParam = searchParams.get('origin');
+  const searchParam = searchParams.get('search');
 
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,7 +46,11 @@ const ShopPage: React.FC = () => {
   const filteredProducts = products.filter(p => {
     const gradeMatch = filterGrade.length === 0 || filterGrade.includes(p.grade);
     const originMatch = filterOrigin.length === 0 || filterOrigin.includes(p.origin);
-    return gradeMatch && originMatch;
+    const searchMatch = !searchParam ||
+      p.name.toLowerCase().includes(searchParam.toLowerCase()) ||
+      p.description.toLowerCase().includes(searchParam.toLowerCase());
+
+    return gradeMatch && originMatch && searchMatch;
   });
 
   const toggleFilter = (val: string, current: string[], setter: React.Dispatch<React.SetStateAction<string[]>>) => {
@@ -162,7 +168,7 @@ const ShopPage: React.FC = () => {
           {filteredProducts.length === 0 && (
             <div className="py-20 text-center">
               <h3 className="text-2xl font-display text-primary/40">No matching harvests found.</h3>
-              <button onClick={() => { setFilterGrade([]); setFilterOrigin([]); }} className="mt-4 text-accent-gold uppercase font-bold tracking-widest text-xs">Clear all filters</button>
+              <button onClick={() => { setFilterGrade([]); setFilterOrigin([]); window.history.pushState({}, '', '#/shop'); }} className="mt-4 text-accent-gold uppercase font-bold tracking-widest text-xs">Clear all filters</button>
             </div>
           )}
         </div>

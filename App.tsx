@@ -1,7 +1,7 @@
 
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { HashRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import { Product, CartItem, Page } from './types';
 import { PRODUCTS } from './constants';
 import HomePage from './pages/HomePage';
@@ -14,6 +14,16 @@ import { getCart, addToCart as apiAddToCart } from './lib/api';
 const Header: React.FC<{ cartCount: number }> = ({ cartCount }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/shop?search=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery('');
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
@@ -52,10 +62,16 @@ const Header: React.FC<{ cartCount: number }> = ({ cartCount }) => {
         </Link>
 
         <div className="flex-1 flex justify-end items-center gap-6">
-          <div className="hidden sm:flex items-center border-b border-stone-300 dark:border-stone-700 pb-1">
+          <form onSubmit={handleSearch} className="hidden sm:flex items-center border-b border-stone-300 dark:border-stone-700 pb-1">
             <span className="material-symbols-outlined text-stone-400 !text-xl">search</span>
-            <input className="bg-transparent border-none focus:ring-0 text-sm placeholder:text-stone-400 w-32 lg:w-48 py-0" placeholder="Search collection" type="text" />
-          </div>
+            <input
+              className="bg-transparent border-none focus:ring-0 text-sm placeholder:text-stone-400 w-32 lg:w-48 py-0"
+              placeholder="Search collection"
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </form>
           <div className="flex items-center gap-4">
             <Link to="/cart" className="relative hover:text-primary transition-colors">
               <span className="material-symbols-outlined !text-2xl">shopping_bag</span>
