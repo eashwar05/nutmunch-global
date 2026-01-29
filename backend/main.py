@@ -47,6 +47,8 @@ class ProductBase(BaseModel):
     weight: str
     grade: str
     origin: str
+    nutritional_info: Optional[str] = "{}"
+    sustainability_info: Optional[str] = None
 
 class Product(ProductBase):
     id: int
@@ -66,8 +68,10 @@ class CartItem(CartItemCreate):
 
 class OrderCreate(BaseModel):
     customer_name: str
-    total_amount: float
-    session_id: str # To clear the cart
+    email: str
+    address: str
+    city: str
+    session_id: str
 
 class Order(BaseModel):
     id: int
@@ -123,17 +127,49 @@ def get_cart(session_id: str, db: Session = Depends(get_db)):
     return db.query(models.CartItem).filter(models.CartItem.session_id == session_id).all()
 
 @app.post("/api/checkout", response_model=Order)
-def checkout(order: OrderCreate, db: Session = Depends(get_db)):
-    # 1. Create Order
+def checkout(order_data: OrderCreate, db: Session = Depends(get_db)):
+    # 1. Get Cart Items
+    cart_items = db.query(models.CartItem).filter(models.CartItem.session_id == order_data.session_id).all()
+    if not cart_items:
+        raise HTTPException(status_code=400, detail="Cart is empty")
+
+    # 2. Validate Stock & Calculate Total (Security)
+    total_amount = 0.0
+    
+    # Check all items first before modifying anything (Atomic check)
+    for item in cart_items:
+        if item.product.stock_quantity < item.quantity:
+            raise HTTPException(status_code=400, detail=f"Insufficient stock for {item.product.name}. Available: {item.product.stock_quantity}")
+        total_amount += item.product.price * item.quantity
+
+    # 3. Create Order
     new_order = models.Order(
-        customer_name=order.customer_name,
-        total_amount=order.total_amount,
+        customer_name=order_data.customer_name,
+        email=order_data.email,
+        address=order_data.address,
+        city=order_data.city,
+        total_amount=total_amount,
         status="completed"
     )
     db.add(new_order)
-    
-    # 2. Clear Cart for session
-    db.query(models.CartItem).filter(models.CartItem.session_id == order.session_id).delete()
+    db.flush() # Flush to get new_order.id
+
+    # 4. Deduct Stock & Create Order Items
+    for item in cart_items:
+        # Deduct Stock
+        item.product.stock_quantity -= item.quantity
+        
+        # Create Order Item (History)
+        order_item = models.OrderItem(
+            order_id=new_order.id,
+            product_id=item.product.id,
+            quantity=item.quantity,
+            price_at_purchase=item.product.price
+        )
+        db.add(order_item)
+
+    # 5. Clear Cart
+    db.query(models.CartItem).filter(models.CartItem.session_id == order_data.session_id).delete()
     
     db.commit()
     db.refresh(new_order)

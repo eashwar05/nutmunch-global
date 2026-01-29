@@ -68,7 +68,7 @@ export async function getCart(sessionId: string): Promise<CartItem[]> {
     }));
 }
 
-export async function checkout(sessionId: string, customerName: string, totalAmount: number) {
+export async function checkout(sessionId: string, customerName: string, email: string, address: string, city: string) {
     const response = await fetch(`${API_BASE_URL}/checkout`, {
         method: 'POST',
         headers: {
@@ -77,7 +77,10 @@ export async function checkout(sessionId: string, customerName: string, totalAmo
         body: JSON.stringify({
             session_id: sessionId,
             customer_name: customerName,
-            total_amount: totalAmount,
+            email: email,
+            address: address,
+            city: city
+            // total_amount is calculated by backend now
         }),
     });
     if (!response.ok) {

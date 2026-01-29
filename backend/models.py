@@ -17,6 +17,8 @@ class Product(Base):
     weight = Column(String)
     grade = Column(String)
     origin = Column(String)
+    nutritional_info = Column(String, default="{}") # JSON string for flexibility
+    sustainability_info = Column(String)
 
 class CartItem(Base):
     __tablename__ = "cart_items"
@@ -33,6 +35,23 @@ class Order(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     customer_name = Column(String)
+    email = Column(String) # Added field
+    address = Column(String) # Added field
+    city = Column(String) # Added field
     total_amount = Column(Float)
     status = Column(String, default="pending")
     created_at = Column(DateTime, default=datetime.utcnow)
+
+    items = relationship("OrderItem", back_populates="order")
+
+class OrderItem(Base):
+    __tablename__ = "order_items"
+
+    id = Column(Integer, primary_key=True, index=True)
+    order_id = Column(Integer, ForeignKey("orders.id"))
+    product_id = Column(Integer, ForeignKey("products.id"))
+    quantity = Column(Integer)
+    price_at_purchase = Column(Float) # Security: Record price at time of buying
+
+    order = relationship("Order", back_populates="items")
+    product = relationship("Product")

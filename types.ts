@@ -9,6 +9,8 @@ export interface Product {
   grade: 'Premium' | 'Standard' | 'Reserve';
   origin: string;
   description: string;
+  nutritional_info?: string; // JSON string
+  sustainability_info?: string;
 }
 
 export interface CartItem extends Product {

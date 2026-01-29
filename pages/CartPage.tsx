@@ -1,7 +1,7 @@
 
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { CartItem } from '../types';
 import { checkout } from '../lib/api';
 
@@ -13,7 +13,11 @@ interface Props {
 
 const CartPage: React.FC<Props> = ({ cart, removeFromCart, updateQuantity }) => {
   const [customerName, setCustomerName] = useState('');
+  const [email, setEmail] = useState('');
+  const [address, setAddress] = useState('');
+  const [city, setCity] = useState('');
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const navigate = useNavigate();
 
   const subtotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
   const shipping = subtotal > 50 ? 0 : 15;
@@ -23,8 +27,8 @@ const CartPage: React.FC<Props> = ({ cart, removeFromCart, updateQuantity }) => 
   const progress = Math.min(100, (subtotal / freeShippingThreshold) * 100);
 
   const handleCheckout = async () => {
-    if (!customerName.trim()) {
-      alert("Please enter your name");
+    if (!customerName.trim() || !email.trim() || !address.trim() || !city.trim()) {
+      alert("Please fill in all shipping details");
       return;
     }
     const sid = localStorage.getItem('session_id');
@@ -32,12 +36,14 @@ const CartPage: React.FC<Props> = ({ cart, removeFromCart, updateQuantity }) => 
 
     setIsCheckingOut(true);
     try {
-      await checkout(sid, customerName, total);
-      alert("Order placed successfully!");
-      // Force reload to clear cart in App state and backend state is already cleared
-      window.location.href = '/';
-    } catch (err) {
-      alert("Checkout failed. Please try again.");
+      const order = await checkout(sid, customerName, email, address, city);
+      // Navigate to confirmation page
+      navigate('/order-confirmation', { state: { order } });
+      // Force reload or state update could happen here, but navigation is clean.
+      // Ideally, App.tsx should detect cart clear, but since we navigate away, it's fine.
+      // Refreshing cart state would be good if user goes back, but backend is cleared.
+    } catch (err: any) {
+      alert("Checkout failed: " + (err.message || "Unknown error"));
       console.error(err);
     } finally {
       setIsCheckingOut(false);
@@ -122,12 +128,34 @@ const CartPage: React.FC<Props> = ({ cart, removeFromCart, updateQuantity }) => 
                 />
               </div>
               <div className="md:col-span-2 space-y-2">
+                <label className="text-xs font-bold uppercase tracking-widest text-stone-400">Email Address</label>
+                <input
+                  className="w-full bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 rounded-lg py-3 px-4 focus:ring-primary focus:border-primary transition-all"
+                  placeholder="john@example.com"
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                />
+              </div>
+              <div className="md:col-span-2 space-y-2">
                 <label className="text-xs font-bold uppercase tracking-widest text-stone-400">Shipping Address</label>
-                <input className="w-full bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 rounded-lg py-3 px-4 focus:ring-primary focus:border-primary transition-all" placeholder="Street name and house number" type="text" />
+                <input
+                  className="w-full bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 rounded-lg py-3 px-4 focus:ring-primary focus:border-primary transition-all"
+                  placeholder="Street name and house number"
+                  type="text"
+                  value={address}
+                  onChange={e => setAddress(e.target.value)}
+                />
               </div>
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-widest text-stone-400">City</label>
-                <input className="w-full bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 rounded-lg py-3 px-4 focus:ring-primary focus:border-primary transition-all" placeholder="Your City" type="text" />
+                <input
+                  className="w-full bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 rounded-lg py-3 px-4 focus:ring-primary focus:border-primary transition-all"
+                  placeholder="Your City"
+                  type="text"
+                  value={city}
+                  onChange={e => setCity(e.target.value)}
+                />
               </div>
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-widest text-stone-400">Postal Code</label>

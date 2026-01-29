@@ -16,6 +16,27 @@ const ProductDetailPage: React.FC<Props> = ({ addToCart }) => {
   const [error, setError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('origin');
+  const [isFavorite, setIsFavorite] = useState(false);
+
+  useEffect(() => {
+    // Check favorites
+    const favs = JSON.parse(localStorage.getItem('favorites') || '[]');
+    if (id) setIsFavorite(favs.includes(id));
+  }, [id]);
+
+  const toggleFavorite = () => {
+    if (!id) return;
+    const favs = JSON.parse(localStorage.getItem('favorites') || '[]');
+    let newFavs;
+    if (favs.includes(id)) {
+      newFavs = favs.filter((fid: string) => fid !== id);
+      setIsFavorite(false);
+    } else {
+      newFavs = [...favs, id];
+      setIsFavorite(true);
+    }
+    localStorage.setItem('favorites', JSON.stringify(newFavs));
+  };
 
   useEffect(() => {
     const loadProduct = async () => {
@@ -37,8 +58,15 @@ const ProductDetailPage: React.FC<Props> = ({ addToCart }) => {
     loadProduct();
   }, [id]);
 
-  if (loading) return <div className="py-24 text-center">Loading...</div>;
+  if (loading) return (
+    <div className="h-screen flex items-center justify-center">
+      <div className="animate-pulse text-2xl font-display text-primary uppercase tracking-widest">Loading Harvest...</div>
+    </div>
+  );
   if (!product) return <div className="py-24 text-center">Product not found.</div>;
+
+  // Parse nutritional info safely
+  const nutritionalData = product.nutritional_info ? JSON.parse(product.nutritional_info) : {};
 
   return (
     <main className="max-w-[1280px] mx-auto px-6 lg:px-10 py-8 min-h-screen">
@@ -123,8 +151,8 @@ const ProductDetailPage: React.FC<Props> = ({ addToCart }) => {
                 <span className="material-symbols-outlined">shopping_cart</span>
                 Add to Cart
               </button>
-              <button onClick={() => alert("Added to favorites!")} className="size-16 border-2 border-stone-100 dark:border-white/10 hover:border-primary hover:text-primary rounded-xl flex items-center justify-center transition-all group">
-                <span className="material-symbols-outlined group-hover:scale-110 transition-transform">favorite</span>
+              <button onClick={toggleFavorite} className={`size-16 border-2 hover:border-primary hover:text-primary rounded-xl flex items-center justify-center transition-all group ${isFavorite ? 'border-primary text-primary bg-primary/10' : 'border-stone-100 dark:border-white/10'}`}>
+                <span className={`material-symbols-outlined group-hover:scale-110 transition-transform ${isFavorite ? 'fill-1' : ''}`}>favorite</span>
               </button>
             </div>
           </div>
@@ -150,7 +178,7 @@ const ProductDetailPage: React.FC<Props> = ({ addToCart }) => {
             <div className="space-y-6">
               <h3 className="text-2xl font-bold italic font-display text-primary">A Legacy of Export Excellence</h3>
               <p className="text-stone-500 leading-relaxed text-lg">
-                Sourced from the heart of the {product.origin} region. Our orchards have been cultivated for generations, ensuring the perfect balance of soil nutrients and climate for this specific variety.
+                {product.sustainability_info || `Sourced from the heart of the ${product.origin} region. Our orchards have been cultivated for generations, ensuring the perfect balance of soil nutrients and climate for this specific variety.`}
               </p>
               <p className="text-stone-500 leading-relaxed text-lg">
                 Each nut is sorted by hand, ensuring that only the "{product.grade}" grade—those with perfect shape, size, and skin integrity—make it into our premium packaging.
@@ -184,20 +212,20 @@ const ProductDetailPage: React.FC<Props> = ({ addToCart }) => {
               Nutritional Profile <span className="text-sm font-normal text-stone-400">(per 100g serving)</span>
             </h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-              {[
-                { label: 'Calories', val: '579 kcal', pct: '70%' },
-                { label: 'Protein', val: '21.2 g', pct: '40%' },
-                { label: 'Healthy Fats', val: '49.9 g', pct: '85%' },
-                { label: 'Vitamin E', val: '26.2 mg', pct: '95%' }
-              ].map(item => (
-                <div key={item.label} className="space-y-2">
-                  <p className="text-xs font-bold uppercase text-stone-400">{item.label}</p>
-                  <p className="text-2xl font-bold text-stone-800">{item.val}</p>
-                  <div className="h-1 bg-stone-200 rounded-full overflow-hidden">
-                    <div className="h-full bg-primary" style={{ width: item.pct }}></div>
+              {Object.entries(nutritionalData).length > 0 ? (
+                Object.entries(nutritionalData).map(([key, value]) => (
+                  <div key={key} className="space-y-2">
+                    <p className="text-xs font-bold uppercase text-stone-400">{key}</p>
+                    <p className="text-2xl font-bold text-stone-800">{String(value)}</p>
+                    <div className="h-1 bg-stone-200 rounded-full overflow-hidden">
+                      {/* Random width for demo since we don't have pct data in simple string map, or we could add it to JSON */}
+                      <div className="h-full bg-primary" style={{ width: '60%' }}></div>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p>No nutritional data available.</p>
+              )}
             </div>
           </div>
         )}

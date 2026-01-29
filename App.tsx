@@ -8,6 +8,7 @@ import HomePage from './pages/HomePage';
 import ShopPage from './pages/ShopPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import CartPage from './pages/CartPage';
+import OrderConfirmationPage from './pages/OrderConfirmationPage';
 import { getCart, addToCart as apiAddToCart } from './lib/api';
 
 // Components
@@ -252,6 +253,7 @@ const App: React.FC = () => {
         <Route path="/shop" element={<ShopPage />} />
         <Route path="/product/:id" element={<ProductDetailPage addToCart={addToCart} />} />
         <Route path="/cart" element={<CartPage cart={cart} removeFromCart={removeFromCart} updateQuantity={updateQuantity} />} />
+        <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
       </Routes>
       <Footer />
       {/* Concierge Button */}
