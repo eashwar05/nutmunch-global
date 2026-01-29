@@ -152,6 +152,9 @@ const Footer: React.FC = () => (
         <span className="material-symbols-outlined !text-3xl">payments</span>
       </div>
     </div>
+    <div className="text-[10px] text-center text-red-500 font-bold opacity-50 pb-4">
+      DEBUG: API_URL = {import.meta.env.VITE_API_URL || 'Using Localhost Fallback'}
+    </div>
   </footer>
 );
 
