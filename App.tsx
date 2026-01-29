@@ -198,15 +198,11 @@ const App: React.FC = () => {
   };
 
   const removeFromCart = async (id: string) => {
-    // Workaround: Send negative quantity to reduce count to 0 (or below)
-    // Since backend adds quantity.
-    // We need current quantity.
-    // Id is string in frontend, but backend uses int. 
-    // Wait, backend CartItem has product_id (int). The `id` passed here might be product.id.
-    const item = cart.find(i => i.product.id.toString() === id || i.product_id?.toString() === id); // Handle potential type mismatch
+    // Note: id passed here is the product ID (as per CartPage usage)
+    const item = cart.find(i => i.id === id);
     if (item && sessionId) {
       try {
-        await apiAddToCart(sessionId, item.product.id.toString(), -item.quantity);
+        await apiAddToCart(sessionId, item.id, -item.quantity);
         await refreshCart();
       } catch (err) {
         console.error("Failed to remove from cart", err);
@@ -214,15 +210,13 @@ const App: React.FC = () => {
     }
   };
 
-  // Update quantity functionality not strictly requested in API but UI has it. 
-  // We can implement it using the difference.
   const updateQuantity = async (id: string, q: number) => {
-    const item = cart.find(i => i.product.id.toString() === id || i.product_id?.toString() === id);
+    const item = cart.find(i => i.id === id);
     if (item && sessionId) {
       const diff = q - item.quantity;
       if (diff !== 0) {
         try {
-          await apiAddToCart(sessionId, item.product.id.toString(), diff);
+          await apiAddToCart(sessionId, item.id, diff);
           await refreshCart();
         } catch (err) {
           console.error("Failed to update quantity", err);
