@@ -13,6 +13,7 @@ import { getCart, addToCart as apiAddToCart } from './lib/api';
 // Components
 const Header: React.FC<{ cartCount: number }> = ({ cartCount }) => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
@@ -33,7 +34,7 @@ const Header: React.FC<{ cartCount: number }> = ({ cartCount }) => {
             <span className="material-symbols-outlined !text-sm">language</span>
             <span>EN / USD</span>
           </div>
-          <a className="hover:text-accent-gold transition-colors" href="#">My Account</a>
+          <a className="hover:text-accent-gold transition-colors" href="#" onClick={(e) => { e.preventDefault(); alert("Account portal coming soon."); }}>My Account</a>
         </div>
       </div>
 
@@ -41,8 +42,8 @@ const Header: React.FC<{ cartCount: number }> = ({ cartCount }) => {
       <div className="px-6 md:px-12 py-5 flex items-center justify-between">
         <div className="flex-1 hidden lg:flex gap-10 text-[11px] tracking-[0.15em] uppercase font-semibold">
           <Link to="/shop" className="hover:text-primary transition-colors">Collections</Link>
-          <Link to="/" className="hover:text-primary transition-colors">Our Heritage</Link>
-          <Link to="/" className="hover:text-primary transition-colors">Export Services</Link>
+          <Link to="/#legacy" className="hover:text-primary transition-colors">Our Heritage</Link>
+          <Link to="/shop?grade=Reserve" className="hover:text-primary transition-colors">Export Services</Link>
         </div>
 
         <Link to="/" className="flex flex-col items-center">
@@ -64,10 +65,25 @@ const Header: React.FC<{ cartCount: number }> = ({ cartCount }) => {
                 </span>
               )}
             </Link>
-            <button className="lg:hidden">
+            <button className="lg:hidden" onClick={() => setIsMobileMenuOpen(true)}>
               <span className="material-symbols-outlined !text-2xl">menu</span>
             </button>
           </div>
+        </div>
+      </div>
+
+      {/* Mobile Menu Overlay */}
+      <div className={`fixed inset-0 bg-background-light dark:bg-stone-900 z-[60] transition-transform duration-300 ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+        <div className="flex justify-end p-8">
+          <button onClick={() => setIsMobileMenuOpen(false)}>
+            <span className="material-symbols-outlined !text-3xl">close</span>
+          </button>
+        </div>
+        <div className="flex flex-col items-center gap-8 text-2xl font-display uppercase tracking-widest">
+          <Link to="/shop" onClick={() => setIsMobileMenuOpen(false)}>Collections</Link>
+          <Link to="/#legacy" onClick={() => setIsMobileMenuOpen(false)}>Heritage</Link>
+          <Link to="/cart" onClick={() => setIsMobileMenuOpen(false)}>Cart ({cartCount})</Link>
+          <a href="#" onClick={(e) => { e.preventDefault(); alert("Account portal coming soon"); setIsMobileMenuOpen(false); }}>Account</a>
         </div>
       </div>
     </header>
@@ -94,28 +110,28 @@ const Footer: React.FC = () => (
       <div>
         <h4 className="text-[11px] font-bold tracking-[0.2em] uppercase text-stone-400 mb-6">Shop</h4>
         <ul className="flex flex-col gap-4 text-sm text-stone-600 dark:text-stone-400">
-          <li><Link className="hover:text-primary transition-colors" to="/shop">Raw Collection</Link></li>
-          <li><Link className="hover:text-primary transition-colors" to="/shop">Gourmet Roasted</Link></li>
-          <li><Link className="hover:text-primary transition-colors" to="/shop">Specialty Blends</Link></li>
+          <li><Link className="hover:text-primary transition-colors" to="/shop?category=Raw">Raw Collection</Link></li>
+          <li><Link className="hover:text-primary transition-colors" to="/shop?category=Roasted">Gourmet Roasted</Link></li>
+          <li><Link className="hover:text-primary transition-colors" to="/shop?category=Confection">Specialty Blends</Link></li>
           <li><Link className="hover:text-primary transition-colors" to="/shop">Gift Sets</Link></li>
         </ul>
       </div>
       <div>
         <h4 className="text-[11px] font-bold tracking-[0.2em] uppercase text-stone-400 mb-6">Company</h4>
         <ul className="flex flex-col gap-4 text-sm text-stone-600 dark:text-stone-400">
-          <li><a className="hover:text-primary transition-colors" href="#">Our Heritage</a></li>
-          <li><a className="hover:text-primary transition-colors" href="#">Sustainability</a></li>
-          <li><a className="hover:text-primary transition-colors" href="#">Careers</a></li>
-          <li><a className="hover:text-primary transition-colors" href="#">Press</a></li>
+          <li><Link className="hover:text-primary transition-colors" to="/#legacy">Our Heritage</Link></li>
+          <li><a className="hover:text-primary transition-colors" href="#" onClick={(e) => { e.preventDefault(); alert("Sustainability report coming soon."); }}>Sustainability</a></li>
+          <li><a className="hover:text-primary transition-colors" href="#" onClick={(e) => { e.preventDefault(); alert("We are hiring! Check back later."); }}>Careers</a></li>
+          <li><a className="hover:text-primary transition-colors" href="#" onClick={(e) => { e.preventDefault(); alert("Press kit coming soon."); }}>Press</a></li>
         </ul>
       </div>
       <div>
         <h4 className="text-[11px] font-bold tracking-[0.2em] uppercase text-stone-400 mb-6">Support</h4>
         <ul className="flex flex-col gap-4 text-sm text-stone-600 dark:text-stone-400">
-          <li><a className="hover:text-primary transition-colors" href="#">Shipping & Returns</a></li>
-          <li><a className="hover:text-primary transition-colors" href="#">Track Order</a></li>
-          <li><a className="hover:text-primary transition-colors" href="#">Wholesale Inquiry</a></li>
-          <li><a className="hover:text-primary transition-colors" href="#">Privacy Policy</a></li>
+          <li><a className="hover:text-primary transition-colors" href="#" onClick={(e) => { e.preventDefault(); alert("Shipping info coming soon."); }}>Shipping & Returns</a></li>
+          <li><a className="hover:text-primary transition-colors" href="#" onClick={(e) => { e.preventDefault(); alert("Tracking feature coming soon."); }}>Track Order</a></li>
+          <li><a className="hover:text-primary transition-colors" href="#" onClick={(e) => { e.preventDefault(); alert("Please email wholesale@nutmunch.com"); }}>Wholesale Inquiry</a></li>
+          <li><a className="hover:text-primary transition-colors" href="#" onClick={(e) => { e.preventDefault(); alert("Privacy Policy coming soon."); }}>Privacy Policy</a></li>
         </ul>
       </div>
       <div className="flex flex-col justify-between">
@@ -226,8 +242,8 @@ const App: React.FC = () => {
       </Routes>
       <Footer />
       {/* Concierge Button */}
-      <button className="fixed bottom-8 right-8 z-50 group flex items-center gap-4">
-        <span className="bg-white dark:bg-stone-800 text-stone-800 dark:text-white px-4 py-2 rounded-full text-[10px] font-bold tracking-widest uppercase shadow-2xl opacity-0 group-hover:opacity-100 transition-opacity border border-stone-200 dark:border-stone-700">Concierge Help</span>
+      <button onClick={() => alert("Concierge is currently offline. Please call +1 (800) 555-ALMD")} className="fixed bottom-8 right-8 z-50 group flex items-center gap-4">
+        <span className="bg-white dark:bg-stone-800 text-stone-800 dark:text-white px-4 py-2 rounded-full text-[10px] font-bold tracking-widest uppercase shadow-2xl transition-opacity border border-stone-200 dark:border-stone-700 opacity-0 group-hover:opacity-100">Concierge Help</span>
         <div className="w-14 h-14 bg-accent-gold text-white rounded-full flex items-center justify-center shadow-[0_10px_30px_rgba(199,161,94,0.4)] hover:scale-110 transition-transform">
           <span className="material-symbols-outlined !text-2xl">support_agent</span>
         </div>
@@ -238,10 +254,19 @@ const App: React.FC = () => {
 
 // Helper to scroll to top on route change
 function ScrollToTop() {
-  const { pathname } = useLocation();
+  const { pathname, hash } = useLocation();
   useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
+    if (hash) {
+      setTimeout(() => {
+        const element = document.getElementById(hash.replace('#', ''));
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }, [pathname, hash]);
   return null;
 }
 

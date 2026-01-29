@@ -1,21 +1,28 @@
 
 
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { fetchProducts } from '../lib/api';
 import { Product } from '../types';
 
 const ShopPage: React.FC = () => {
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const categoryParam = searchParams.get('category');
+  const gradeParam = searchParams.get('grade');
+  const originParam = searchParams.get('origin');
+
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filterGrade, setFilterGrade] = useState<string[]>([]);
-  const [filterOrigin, setFilterOrigin] = useState<string[]>([]);
+  const [filterGrade, setFilterGrade] = useState<string[]>(gradeParam ? [gradeParam] : []);
+  const [filterOrigin, setFilterOrigin] = useState<string[]>(originParam ? [originParam] : []);
 
   useEffect(() => {
     const loadProducts = async () => {
+      setLoading(true);
       try {
-        const data = await fetchProducts();
+        const data = await fetchProducts(categoryParam || undefined);
         // The backend returns image_url, but frontend usage expects 'image'. 
         // We need to map it or update the type. 
         // Looking at types.ts, Product has 'image'. Backend has 'image_url'.
@@ -32,7 +39,7 @@ const ShopPage: React.FC = () => {
       }
     };
     loadProducts();
-  }, []);
+  }, [categoryParam]);
 
   const filteredProducts = products.filter(p => {
     const gradeMatch = filterGrade.length === 0 || filterGrade.includes(p.grade);

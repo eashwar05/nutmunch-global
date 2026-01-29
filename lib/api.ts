@@ -1,6 +1,6 @@
 import { Product, CartItem } from '../types';
 
-const API_BASE_URL = 'https://nutmunch-global.onrender.com/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 export async function fetchProducts(category?: string): Promise<Product[]> {
     const url = new URL(`${API_BASE_URL}/products`);

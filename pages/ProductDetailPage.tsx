@@ -123,7 +123,7 @@ const ProductDetailPage: React.FC<Props> = ({ addToCart }) => {
                 <span className="material-symbols-outlined">shopping_cart</span>
                 Add to Cart
               </button>
-              <button className="size-16 border-2 border-stone-100 dark:border-white/10 hover:border-primary hover:text-primary rounded-xl flex items-center justify-center transition-all group">
+              <button onClick={() => alert("Added to favorites!")} className="size-16 border-2 border-stone-100 dark:border-white/10 hover:border-primary hover:text-primary rounded-xl flex items-center justify-center transition-all group">
                 <span className="material-symbols-outlined group-hover:scale-110 transition-transform">favorite</span>
               </button>
             </div>
