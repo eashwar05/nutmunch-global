@@ -136,7 +136,7 @@ const ShopPage: React.FC = () => {
         {/* Product Grid - Waterfall */}
         <div className="flex-1">
           {filteredProducts.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-10 gap-y-20">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-16 gap-y-32">
               {filteredProducts.map((product, index) => (
                 <Link
                   to={`/product/${product.id}`}
@@ -144,10 +144,10 @@ const ShopPage: React.FC = () => {
                   className="group block animate-fade-in-up"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
-                  <div className="relative aspect-[3/4] bg-background-paper overflow-hidden mb-8">
+                  <div className="relative aspect-[4/5] bg-background-paper overflow-hidden mb-8">
                     {/* Image with Blending */}
                     <div
-                      className="w-full h-full bg-center bg-contain bg-no-repeat mix-blend-multiply opacity-90 transition-transform duration-[1.5s] ease-out group-hover:scale-110"
+                      className="w-full h-full bg-center bg-contain bg-no-repeat mix-blend-multiply opacity-90 transition-transform duration-1000 ease-[cubic-bezier(0.2,0.6,0.2,1)] group-hover:scale-110"
                       style={{ backgroundImage: `url("${product.image}")` }}
                     ></div>
 
@@ -164,9 +164,9 @@ const ShopPage: React.FC = () => {
               ))}
             </div>
           ) : (
-            <div className="py-32 text-center">
-              <h3 className="text-3xl font-display text-primary/20 italic mb-6">No harvests found.</h3>
-              <button onClick={() => { setFilterGrade([]); setFilterOrigin([]); window.history.pushState({}, '', '#/shop'); }} className="text-sm font-bold text-accent-gold uppercase tracking-widest border-b border-accent-gold pb-1 hover:text-primary hover:border-primary transition-colors">Clear Filters</button>
+            <div className="py-32 text-center flex flex-col items-center justify-center min-h-[400px]">
+              <h3 className="text-3xl font-display text-primary/40 leading-relaxed max-w-lg mb-8">Our seasonal collection is currently being curated. Please check back shortly.</h3>
+              <button onClick={() => { setFilterGrade([]); setFilterOrigin([]); window.history.pushState({}, '', '#/shop'); }} className="text-xs font-bold text-accent-gold uppercase tracking-[0.2em] border-b border-accent-gold pb-1 hover:text-primary hover:border-primary transition-colors">View All Collections</button>
             </div>
           )}
         </div>

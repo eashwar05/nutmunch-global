@@ -22,14 +22,14 @@ export async function fetchProduct(id: string): Promise<Product> {
     return response.json();
 }
 
-export async function addToCart(sessionId: string, productId: string, quantity: number): Promise<CartItem> {
+export async function addToCart(productId: string, quantity: number): Promise<CartItem> {
     const response = await fetch(`${API_BASE_URL}/cart`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({
-            session_id: sessionId,
             product_id: parseInt(productId),
             quantity: quantity,
         }),
@@ -41,8 +41,10 @@ export async function addToCart(sessionId: string, productId: string, quantity: 
 }
 
 
-export async function getCart(sessionId: string): Promise<CartItem[]> {
-    const response = await fetch(`${API_BASE_URL}/cart/${sessionId}`);
+export async function getCart(): Promise<CartItem[]> {
+    const response = await fetch(`${API_BASE_URL}/cart`, {
+        credentials: 'include'
+    });
     if (!response.ok) {
         throw new Error('Failed to fetch cart');
     }
@@ -68,14 +70,14 @@ export async function getCart(sessionId: string): Promise<CartItem[]> {
     }));
 }
 
-export async function checkout(sessionId: string, customerName: string, email: string, address: string, city: string) {
+export async function checkout(customerName: string, email: string, address: string, city: string) {
     const response = await fetch(`${API_BASE_URL}/checkout`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({
-            session_id: sessionId,
             customer_name: customerName,
             email: email,
             address: address,

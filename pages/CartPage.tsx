@@ -31,12 +31,11 @@ const CartPage: React.FC<Props> = ({ cart, removeFromCart, updateQuantity }) => 
       alert("Please fill in all shipping details");
       return;
     }
-    const sid = localStorage.getItem('session_id');
-    if (!sid) return;
+    // const sid = localStorage.getItem('session_id'); // Removed for Security
 
     setIsCheckingOut(true);
     try {
-      const order = await checkout(sid, customerName, email, address, city);
+      const order = await checkout(customerName, email, address, city);
       // Navigate to confirmation page
       navigate('/order-confirmation', { state: { order } });
       // Force reload or state update could happen here, but navigation is clean.

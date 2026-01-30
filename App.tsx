@@ -50,7 +50,7 @@ const Header: React.FC<{ cartCount: number }> = ({ cartCount }) => {
       </div>
 
       {/* Main Nav */}
-      <div className="px-6 md:px-12 py-5 flex items-center justify-between">
+      <div className="px-6 md:px-12 py-8 flex items-center justify-between">
         <div className="flex-1 hidden lg:flex gap-12 text-[11px] tracking-[0.15em] uppercase font-semibold text-primary/80">
           <Link to="/shop" className="hover:text-primary transition-colors hover:line-through decoration-accent-gold">Collections</Link>
           <Link to="/#legacy" className="hover:text-primary transition-colors hover:line-through decoration-accent-gold">Our Heritage</Link>
@@ -58,7 +58,7 @@ const Header: React.FC<{ cartCount: number }> = ({ cartCount }) => {
         </div>
 
         <Link to="/" className="flex flex-col items-center">
-          <h1 className="font-display text-3xl md:text-4xl font-black tracking-tight text-primary uppercase">NUTMUNCH</h1>
+          <h1 className="font-display text-3xl md:text-4xl font-black tracking-[0.2em] text-primary uppercase">NUTMUNCH</h1>
           <span className="text-[9px] tracking-[0.4em] uppercase text-accent-gold font-bold mt-1">Est. 1984</span>
         </Link>
 
@@ -159,37 +159,27 @@ const Footer: React.FC = () => (
 
 const App: React.FC = () => {
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [sessionId, setSessionId] = useState<string>('');
+  // const [sessionId, setSessionId] = useState<string>(''); // Removed for HttpOnly Cookie Security
 
   useEffect(() => {
-    let sid = localStorage.getItem('session_id');
-    if (!sid) {
-      sid = Math.random().toString(36).substring(2) + Date.now().toString(36);
-      localStorage.setItem('session_id', sid);
-    }
-    setSessionId(sid);
-
-    // Fetch initial cart
-    getCart(sid).then(items => {
-      // Filter out items with 0 quantity (workaround since we don't delete them on backend)
+    // Initial Cart Load - Backend will assign session cookie if missing
+    getCart().then(items => {
       setCart(items.filter(i => i.quantity > 0));
     }).catch(console.error);
   }, []);
 
   const refreshCart = useCallback(async () => {
-    if (!sessionId) return;
     try {
-      const items = await getCart(sessionId);
+      const items = await getCart();
       setCart(items.filter(i => i.quantity > 0));
     } catch (err) {
       console.error(err);
     }
-  }, [sessionId]);
+  }, []);
 
   const addToCart = async (product: Product, quantity: number = 1) => {
-    if (!sessionId) return;
     try {
-      await apiAddToCart(sessionId, product.id, quantity);
+      await apiAddToCart(product.id, quantity);
       await refreshCart();
     } catch (err) {
       console.error("Failed to add to cart", err);
@@ -199,9 +189,9 @@ const App: React.FC = () => {
   const removeFromCart = async (id: string) => {
     // Note: id passed here is the product ID (as per CartPage usage)
     const item = cart.find(i => i.id === id);
-    if (item && sessionId) {
+    if (item) {
       try {
-        await apiAddToCart(sessionId, item.id, -item.quantity);
+        await apiAddToCart(item.id, -item.quantity);
         await refreshCart();
       } catch (err) {
         console.error("Failed to remove from cart", err);
@@ -211,11 +201,11 @@ const App: React.FC = () => {
 
   const updateQuantity = async (id: string, q: number) => {
     const item = cart.find(i => i.id === id);
-    if (item && sessionId) {
+    if (item) {
       const diff = q - item.quantity;
       if (diff !== 0) {
         try {
-          await apiAddToCart(sessionId, item.id, diff);
+          await apiAddToCart(item.id, diff);
           await refreshCart();
         } catch (err) {
           console.error("Failed to update quantity", err);

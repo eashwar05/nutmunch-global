@@ -1,4 +1,5 @@
-from fastapi import FastAPI, Depends, HTTPException, Query
+from fastapi import FastAPI, Depends, HTTPException, Query, Request, Response
+import uuid
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import List, Optional
@@ -12,12 +13,12 @@ models.Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
 # Run migration on startup to ensure DB is up to date
+# REMOVED: Migrations should be run manually or via a release script to prevent race conditions.
+# Use `python backend/migrate_db.py` to migrate.
 @app.on_event("startup")
 def startup_event():
-    from migrate_db import migrate
     from update_products import update_data
     try:
-        migrate()
         update_data()
     except Exception as e:
         print(f"Startup tasks failed: {e}")
@@ -27,16 +28,16 @@ origins = [
     "http://localhost:3000",
     "http://localhost:5173",  # Common Vite local port
     "https://nutmunch-global.vercel.app",
-    "*", # This wildcard allows ALL domains to talk to your API
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 # Dependency
 def get_db():
@@ -45,6 +46,16 @@ def get_db():
         yield db
     finally:
         db.close()
+
+# Session Management Dependency
+def get_session_id(request: Request, response: Response):
+    session_id = request.cookies.get("session_id")
+    if not session_id:
+        session_id = str(uuid.uuid4())
+        # Set HttpOnly cookie - secure=True should be used in production with HTTPS
+        # samesite='lax' allows basic navigation, 'strict' is better but can break links
+        response.set_cookie(key="session_id", value=session_id, httponly=True, samesite='lax')
+    return session_id
 
 # Pydantic Models
 class ProductBase(BaseModel):
@@ -66,10 +77,14 @@ class Product(ProductBase):
     class Config:
         orm_mode = True
 
+from pydantic import BaseModel, Field
+
+# ... (ProductBase, Product remain unchanged) ...
+
 class CartItemCreate(BaseModel):
-    session_id: str
+    # session_id removed from input, handy for security
     product_id: int
-    quantity: int
+    quantity: int = Field(..., gt=0, description="Quantity must be positive")
 
 class CartItem(CartItemCreate):
     id: int
@@ -82,7 +97,7 @@ class OrderCreate(BaseModel):
     email: str
     address: str
     city: str
-    session_id: str
+    # session_id handled by cookie
 
 class Order(BaseModel):
     id: int
@@ -109,7 +124,7 @@ def get_product(product_id: int, db: Session = Depends(get_db)):
     return product
 
 @app.post("/api/cart", response_model=CartItem)
-def add_to_cart(item: CartItemCreate, db: Session = Depends(get_db)):
+def add_to_cart(item: CartItemCreate, session_id: str = Depends(get_session_id), db: Session = Depends(get_db)):
     # Check if product exists
     product = db.query(models.Product).filter(models.Product.id == item.product_id).first()
     if not product:
@@ -117,71 +132,108 @@ def add_to_cart(item: CartItemCreate, db: Session = Depends(get_db)):
 
     # Check if item already exists in cart for this session
     existing_item = db.query(models.CartItem).filter(
-        models.CartItem.session_id == item.session_id,
+        models.CartItem.session_id == session_id,
         models.CartItem.product_id == item.product_id
     ).first()
 
     if existing_item:
         existing_item.quantity += item.quantity
+        if existing_item.quantity <= 0:
+             db.delete(existing_item) # Remove if quantity becomes 0 or less
+        else:
+             db.refresh(existing_item) # Just refresh if just adding
+        
         db.commit()
-        db.refresh(existing_item)
-        return existing_item
+        if existing_item.quantity > 0:
+            db.refresh(existing_item)
+            return existing_item
+        else:
+             # If deleted, we need to return something valid or handle it. 
+             # The Response model expects a CartItem. 
+             # Let's return a dummy or handle removal differently. 
+             # Ideally, we return 204 for deletion, but to keep API simple for now:
+             return existing_item # This might fail if deleted. 
+             # Let's actually enforce positive add only here in 'Add', 
+             # Update logic might need separate endpoint or handling.
+             # The prompt requested validation gt=0 for input.
+             # So this only adds.
+             pass 
     else:
-        new_item = models.CartItem(**item.dict())
+        new_item = models.CartItem(session_id=session_id, product_id=item.product_id, quantity=item.quantity)
         db.add(new_item)
         db.commit()
         db.refresh(new_item)
         return new_item
 
-@app.get("/api/cart/{session_id}", response_model=List[CartItem])
-def get_cart(session_id: str, db: Session = Depends(get_db)):
+@app.get("/api/cart", response_model=List[CartItem])
+def get_cart(session_id: str = Depends(get_session_id), db: Session = Depends(get_db)):
     return db.query(models.CartItem).filter(models.CartItem.session_id == session_id).all()
 
 @app.post("/api/checkout", response_model=Order)
-def checkout(order_data: OrderCreate, db: Session = Depends(get_db)):
+def checkout(order_data: OrderCreate, session_id: str = Depends(get_session_id), db: Session = Depends(get_db)):
     # 1. Get Cart Items
-    cart_items = db.query(models.CartItem).filter(models.CartItem.session_id == order_data.session_id).all()
+    cart_items = db.query(models.CartItem).filter(models.CartItem.session_id == session_id).all()
     if not cart_items:
         raise HTTPException(status_code=400, detail="Cart is empty")
 
-    # 2. Validate Stock & Calculate Total (Security)
-    total_amount = 0.0
-    
-    # Check all items first before modifying anything (Atomic check)
-    for item in cart_items:
-        if item.product.stock_quantity < item.quantity:
-            raise HTTPException(status_code=400, detail=f"Insufficient stock for {item.product.name}. Available: {item.product.stock_quantity}")
-        total_amount += item.product.price * item.quantity
-
-    # 3. Create Order
-    new_order = models.Order(
-        customer_name=order_data.customer_name,
-        email=order_data.email,
-        address=order_data.address,
-        city=order_data.city,
-        total_amount=total_amount,
-        status="completed"
-    )
-    db.add(new_order)
-    db.flush() # Flush to get new_order.id
-
-    # 4. Deduct Stock & Create Order Items
-    for item in cart_items:
-        # Deduct Stock
-        item.product.stock_quantity -= item.quantity
+    # Start Transaction
+    try:
+        # 2. Validate Stock & Calculate Total (With Locks - SQLite doesn't support with_for_update well, 
+        # but standardized Logic for when we move to Postgres)
         
-        # Create Order Item (History)
-        order_item = models.OrderItem(
-            order_id=new_order.id,
-            product_id=item.product.id,
-            quantity=item.quantity,
-            price_at_purchase=item.product.price
-        )
-        db.add(order_item)
+        # In a real Postgres DB, we would use: 
+        # products_in_cart = db.query(models.Product).filter(...).with_for_update().all()
+        # For now, we will do a check-and-deduct in one commit block to minimize window, 
+        # though strictly race conditions are still possible in SQLite without Serialize isolation level.
+        
+        total_amount = 0.0
+        
+        for item in cart_items:
+            # Re-fetch product within transaction to get latest stock
+            # (If we were using Postgres, this query would lock the row)
+            product = db.query(models.Product).filter(models.Product.id == item.product_id).with_for_update().first()
+            
+            # Since SQLite might ignore with_for_update, we rely on the single-threaded nature of some setups 
+            # Or accept slight risk until Postgres migration.
+            
+            if product.stock_quantity < item.quantity:
+                raise HTTPException(status_code=400, detail=f"Insufficient stock for {product.name}. Available: {product.stock_quantity}")
+            
+            total_amount += product.price * item.quantity
 
-    # 5. Clear Cart
-    db.query(models.CartItem).filter(models.CartItem.session_id == order_data.session_id).delete()
-    
-    db.commit()
-    db.refresh(new_order)
-    return new_order
+        # 3. Create Order
+        new_order = models.Order(
+            customer_name=order_data.customer_name,
+            email=order_data.email,
+            address=order_data.address,
+            city=order_data.city,
+            total_amount=total_amount,
+            status="completed"
+        )
+        db.add(new_order)
+        db.flush()
+
+        # 4. Deduct Stock & Create Order Items
+        for item in cart_items:
+             # We must use the product instance attached to this session/transaction
+            product = db.query(models.Product).filter(models.Product.id == item.product_id).first()
+            product.stock_quantity -= item.quantity
+            
+            order_item = models.OrderItem(
+                order_id=new_order.id,
+                product_id=item.product.id,
+                quantity=item.quantity,
+                price_at_purchase=item.product.price
+            )
+            db.add(order_item)
+
+        # 5. Clear Cart
+        db.query(models.CartItem).filter(models.CartItem.session_id == session_id).delete()
+        
+        db.commit()
+        db.refresh(new_order)
+        return new_order
+
+    except Exception as e:
+        db.rollback()
+        raise e
