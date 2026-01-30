@@ -15,6 +15,7 @@ load_dotenv(dotenv_path=env_path, override=True)
 # Get the Database URL from env, defaulting to local sqlite
 # If Env loading works, this should be the Neon URL
 SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./sql_app.db")
+print(f"DEBUG: Loaded DATABASE_URL starting with: {SQLALCHEMY_DATABASE_URL[:15]}...")
 
 # Fix for SQLAlchemy 1.4+ which deprecated postgres://
 if SQLALCHEMY_DATABASE_URL and SQLALCHEMY_DATABASE_URL.startswith("postgres://"):

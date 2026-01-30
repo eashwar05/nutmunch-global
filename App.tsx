@@ -12,6 +12,7 @@ import ProductDetailPage from './pages/ProductDetailPage';
 import CartPage from './pages/CartPage';
 import OrderConfirmationPage from './pages/OrderConfirmationPage';
 import { getCart, addToCart as apiAddToCart } from './lib/api';
+import LuxuryLoader from './components/LuxuryLoader';
 
 // Components
 const Header: React.FC<{ cartCount: number }> = ({ cartCount }) => {
@@ -169,7 +170,16 @@ const App: React.FC = () => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [quickLookProduct, setQuickLookProduct] = useState<Product | null>(null);
   const [notification, setNotification] = useState<string | null>(null);
-  // const [sessionId, setSessionId] = useState<string>(''); // Removed for HttpOnly Cookie Security
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Ensure loader stays for at least 2.5 seconds for the "luxury" feel
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 2500);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     // Initial Cart Load - Backend will assign session cookie if missing
@@ -256,6 +266,10 @@ const App: React.FC = () => {
 
   return (
     <Router>
+      <AnimatePresence mode="wait">
+        {isLoading && <LuxuryLoader key="loader" />}
+      </AnimatePresence>
+
       <ScrollToTop />
       <Header cartCount={cartCount} />
       <QuickLookDrawer

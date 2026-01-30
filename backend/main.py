@@ -27,6 +27,8 @@ def startup_event():
     except Exception as e:
         print(f"Startup tasks failed: {e}")
 
+
+
 # CORS
 origins = [
     "http://localhost:3000",
@@ -57,9 +59,9 @@ def get_session_id(request: Request, response: Response):
     session_id = request.cookies.get("session_id")
     if not session_id:
         session_id = str(uuid.uuid4())
-        # Set HttpOnly cookie - secure=True should be used in production with HTTPS
-        # samesite='lax' allows basic navigation, 'strict' is better but can break links
-        response.set_cookie(key="session_id", value=session_id, httponly=True, samesite='lax')
+        # Set HttpOnly cookie - secure=True for production
+        is_production = os.getenv("VERCEL_ENV") is not None or os.getenv("Render") is not None
+        response.set_cookie(key="session_id", value=session_id, httponly=True, secure=is_production, samesite='lax')
     return session_id
 
 # Pydantic Models
@@ -124,12 +126,33 @@ def search_products(q: str = Query(..., min_length=1), db: Session = Depends(get
     ).all()
     return products
 
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+from urllib.parse import urlparse
+
+# Rate Limiter Setup
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# ... (start of optimize_image)
+
 @app.get("/api/optimize-image")
-def optimize_image(url: str, width: int = 800):
+@limiter.limit("50/minute")
+def optimize_image(request: Request, url: str, width: int = 800):
     try:
+        # SSRF Protection: Whitelist allowed domains
+        allowed_domains = ["lh3.googleusercontent.com", "images.unsplash.com", "plus.unsplash.com"]
+        parsed_url = urlparse(url)
+        if parsed_url.hostname not in allowed_domains:
+             # Fallback for internal assets or relative paths if we supported them, but here strict.
+             # Actually, seed data uses google images.
+             raise ValueError("Domain not allowed for optimization")
+
         # Simple proxy and optimize
         # In a real app, you'd cache these results to avoid repeated fetches/processing
-        response = requests.get(url, stream=True)
+        response = requests.get(url, stream=True, timeout=5) # Add timeout to prevent hangs
         response.raise_for_status()
         
         img = Image.open(BytesIO(response.content))
@@ -146,10 +169,12 @@ def optimize_image(url: str, width: int = 800):
         buffer.seek(0)
         
         return Response(content=buffer.getvalue(), media_type="image/webp")
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=str(ve))
     except Exception as e:
-        print(f"Image optimization failed: {e}")
-        # Return error detail for debugging
-        raise HTTPException(status_code=500, detail=f"Image optimization failed: {str(e)}")
+        print(f"Image optimization failed: {e}") # Log internal error
+        # Return generic error to client
+        raise HTTPException(status_code=500, detail="Image optimization failed")
 
 @app.get("/api/products", response_model=List[Product])
 def get_products(category: Optional[str] = None, db: Session = Depends(get_db)):
@@ -166,7 +191,8 @@ def get_product(product_id: int, db: Session = Depends(get_db)):
     return product
 
 @app.post("/api/cart", response_model=CartItem)
-def add_to_cart(item: CartItemCreate, session_id: str = Depends(get_session_id), db: Session = Depends(get_db)):
+@limiter.limit("20/minute")
+def add_to_cart(request: Request, item: CartItemCreate, session_id: str = Depends(get_session_id), db: Session = Depends(get_db)):
     # Check if product exists
     product = db.query(models.Product).filter(models.Product.id == item.product_id).first()
     if not product:
