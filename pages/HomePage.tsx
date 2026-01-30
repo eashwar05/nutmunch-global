@@ -1,28 +1,88 @@
-
-import React from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { motion, useScroll, useTransform, useSpring, useMotionValue, useMotionTemplate } from 'framer-motion';
 import { PRODUCTS } from '../constants';
+import { Product } from '../types';
 
-const HomePage: React.FC = () => {
+interface HomePageProps {
+  onQuickLook?: (product: Product) => void;
+}
+
+const HomePage: React.FC<HomePageProps> = ({ onQuickLook }) => {
   const bestsellers = PRODUCTS.slice(0, 4);
+  const targetRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: targetRef });
+  const x = useTransform(scrollYProgress, [0, 1], ["1%", "-75%"]);
+
+  // Mouse Parallax for Hero
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    const { clientX, clientY, currentTarget } = e;
+    const { width, height, left, top } = currentTarget.getBoundingClientRect();
+    mouseX.set((clientX - left) / width - 0.5);
+    mouseY.set((clientY - top) / height - 0.5);
+  };
+
+  const heroImageX = useTransform(mouseX, [-0.5, 0.5], ["5%", "-5%"]);
+  const heroImageY = useTransform(mouseY, [-0.5, 0.5], ["5%", "-5%"]);
+
 
   return (
     <main>
       {/* Hero Section */}
-      <section className="relative h-[90vh] w-full overflow-hidden bg-stone-900 -mt-[112px]">
-        <div className="absolute inset-0 opacity-70">
-          <div
+      <section
+        className="relative h-[90vh] w-full overflow-hidden bg-stone-900 -mt-[112px]"
+        onMouseMove={handleMouseMove}
+      >
+        <div className="absolute inset-0 opacity-70 overflow-hidden">
+          <motion.div
             className="w-full h-full bg-cover bg-center"
-            style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuB1jlPDb4FA-fR4iZ0yo4S5qGqPDLDMmFWX2y--_T_CxsmKYit-y12S0oS20JdL-EIAqxhqI9lrTd9NI3Fgqo-Tvv0yJVBcEAT1DgRWDiX6MsHrV6bFzZ9tWyYOZhppHkEQGd4DfOf0pub8oBDO5YUXJOIG7Od1Kb3zLCUj4tyGAoQ8tN0Zw4QaRl0-6AUeE69KO9wK2cIiZ9L4yO1pXcONKDGi7L-4ej8-Ut7ROy2_lIpIPTvYbtvt7bWoXfMNfBoVOvoAk7LPfOc')" }}
-          ></div>
+            style={{
+              backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuB1jlPDb4FA-fR4iZ0yo4S5qGqPDLDMmFWX2y--_T_CxsmKYit-y12S0oS20JdL-EIAqxhqI9lrTd9NI3Fgqo-Tvv0yJVBcEAT1DgRWDiX6MsHrV6bFzZ9tWyYOZhppHkEQGd4DfOf0pub8oBDO5YUXJOIG7Od1Kb3zLCUj4tyGAoQ8tN0Zw4QaRl0-6AUeE69KO9wK2cIiZ9L4yO1pXcONKDGi7L-4ej8-Ut7ROy2_lIpIPTvYbtvt7bWoXfMNfBoVOvoAk7LPfOc')",
+              scale: 1.2, // Initial Zoom
+              x: heroImageX,
+              y: heroImageY
+            }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 10, ease: "easeOut" }} // Ken Burns Effect
+          ></motion.div>
         </div>
-        <div className="relative h-full flex flex-col items-center justify-center text-center px-4 pt-20">
-          <span className="text-accent-gold text-sm tracking-[0.3em] uppercase mb-4 font-bold">Pure Origin • Peerless Quality</span>
-          <h2 className="font-display text-5xl md:text-7xl text-white max-w-4xl mb-8 leading-[1.1]">The Essence of the Harvest</h2>
-          <div className="flex flex-col sm:flex-row gap-4">
+        <div className="relative h-full flex flex-col items-center justify-center text-center px-4 pt-20 z-10 pointer-events-none">
+          <motion.span
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5, duration: 0.8 }}
+            className="text-accent-gold text-sm tracking-[0.3em] uppercase mb-4 font-bold"
+          >
+            Pure Origin • Peerless Quality
+          </motion.span>
+          <h2 className="font-display text-5xl md:text-7xl text-white max-w-4xl mb-8 leading-[1.1] overflow-hidden px-4 py-2">
+            {/* Staggered Text Reveal */}
+            <div className="flex flex-wrap justify-center gap-x-4">
+              {"The Essence of the Harvest".split(" ").map((word, i) => (
+                <motion.span
+                  key={i}
+                  initial={{ y: "100%", opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.8 + (i * 0.1), duration: 0.6, ease: "easeOut" }}
+                  className="inline-block"
+                >
+                  {word}&nbsp;
+                </motion.span>
+              ))}
+            </div>
+          </h2>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.5 }}
+            className="flex flex-col sm:flex-row gap-4 pointer-events-auto"
+          >
             <Link to="/shop?grade=Reserve" className="bg-primary text-white px-8 py-4 text-xs tracking-widest uppercase font-bold hover:bg-opacity-90 transition-all rounded-sm text-center">Shop The Reserve</Link>
-            <button onClick={() => document.getElementById('legacy')?.scrollIntoView({ behavior: 'smooth' })} className="border border-white text-white px-8 py-4 text-xs tracking-widest uppercase font-bold hover:bg-white hover:text-stone-900 transition-all rounded-sm">Discover Heritage</button>
-          </div>
+            <button onClick={() => document.getElementById('signature')?.scrollIntoView({ behavior: 'smooth' })} className="border border-white text-white px-8 py-4 text-xs tracking-widest uppercase font-bold hover:bg-white hover:text-stone-900 transition-all rounded-sm">Discover Heritage</button>
+          </motion.div>
         </div>
       </section>
 
@@ -75,35 +135,53 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Bestsellers Slider */}
-      <section className="bg-stone-100 dark:bg-stone-900/50 py-24">
-        <div className="px-6 md:px-12 max-w-[1400px] mx-auto">
-          <div className="text-center mb-16">
-            <span className="text-accent-gold text-xs tracking-[0.4em] uppercase font-bold block mb-4">Curated Favorites</span>
-            <h2 className="font-display text-4xl text-primary dark:text-white">The Bestsellers</h2>
+      {/* Signature Collection (Horizontal Scroll) */}
+      <section id="signature" ref={targetRef} className="relative h-[300vh] bg-stone-100 dark:bg-stone-900/50">
+        <div className="sticky top-0 flex h-screen items-center overflow-hidden">
+          <div className="absolute top-24 left-12 z-10 max-w-md">
+            <span className="text-accent-gold text-xs tracking-[0.4em] uppercase font-bold block mb-4">Signature Collection</span>
+            <h2 className="font-display text-4xl text-primary dark:text-white">Curated Favorites</h2>
+            <p className="mt-4 text-primary/60 dark:text-white/60 font-light hidden md:block">Swipe to explore our most coveted selections.</p>
           </div>
-          <div className="flex overflow-x-auto gap-8 pb-12 scrollbar-hide snap-x">
+          <motion.div style={{ x }} className="flex gap-12 pl-[10vw]">
+            {/* Intro spacer */}
+            <div className="w-[30vw] flex-shrink-0" />
+
             {bestsellers.map(product => (
-              <div key={product.id} className="min-w-[300px] md:min-w-[340px] flex-shrink-0 group snap-start">
-                <Link to={`/product/${product.id}`}>
-                  <div className="aspect-[4/5] bg-white dark:bg-stone-800 relative mb-6 overflow-hidden rounded shadow-sm border border-border-soft dark:border-stone-700">
-                    <div className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" style={{ backgroundImage: `url('${product.image}')` }}></div>
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-end justify-center pb-8 opacity-0 group-hover:opacity-100">
-                      <button className="bg-primary text-white px-8 py-3 text-[10px] tracking-widest uppercase font-bold rounded-sm shadow-xl hover:bg-accent-gold transition-colors">View Details</button>
-                    </div>
+              <div key={product.id} className="w-[85vw] md:w-[600px] flex-shrink-0 group relative">
+                <div className="flex flex-col md:flex-row gap-8 items-center bg-white dark:bg-stone-800 p-8 rounded-sm shadow-sm hover:shadow-xl transition-shadow border border-primary/5">
+                  <div className="w-full md:w-1/2 aspect-[4/5] overflow-hidden relative">
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                    {onQuickLook && (
+                      <button
+                        onClick={(e) => { e.preventDefault(); onQuickLook(product); }}
+                        className="absolute bottom-4 right-4 bg-white text-primary px-4 py-2 text-[10px] uppercase font-bold tracking-widest shadow-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-accent-gold hover:text-white"
+                      >
+                        Quick Look
+                      </button>
+                    )}
                   </div>
-                </Link>
-                <div className="text-center px-4">
-                  <p className="text-[10px] tracking-widest text-stone-400 uppercase font-semibold mb-1">{product.category}</p>
-                  <h3 className="font-display text-xl text-stone-800 dark:text-white mb-2">{product.name}</h3>
-                  <div className="flex items-center justify-center gap-4">
-                    <span className="text-accent-gold font-bold">${product.price.toFixed(2)}</span>
-                    <span className="text-stone-400 text-xs italic">{product.weight}</span>
+                  <div className="w-full md:w-1/2 text-left space-y-6">
+                    <div>
+                      <p className="text-[10px] tracking-widest text-accent-gold uppercase font-bold mb-2">{product.category}</p>
+                      <h3 className="font-display text-3xl text-primary dark:text-white">{product.name}</h3>
+                    </div>
+                    <p className="text-primary/70 dark:text-white/70 font-light leading-relaxed">
+                      {product.description}
+                    </p>
+                    <div className="flex items-center gap-6 pt-4 border-t border-primary/10">
+                      <span className="font-display text-2xl text-primary dark:text-white">${product.price.toFixed(2)}</span>
+                      <Link to={`/product/${product.id}`} className="text-xs uppercase font-bold tracking-widest hover:text-accent-gold transition-colors inline-block border-b border-transparent hover:border-accent-gold pb-1">Full Details</Link>
+                    </div>
                   </div>
                 </div>
               </div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 

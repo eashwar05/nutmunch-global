@@ -18,6 +18,20 @@ const ProductDetailPage: React.FC<Props> = ({ addToCart }) => {
   const [activeTab, setActiveTab] = useState('origin');
   const [isFavorite, setIsFavorite] = useState(false);
 
+  // State for weight selection
+  const [selectedWeight, setSelectedWeight] = useState('');
+
+  useEffect(() => {
+    if (product) {
+      setSelectedWeight(product.weight);
+    }
+  }, [product]);
+
+  // Derived price based on weight (Mock logic: Bulk is 3x weight for 2.5x price)
+  const isBulk = selectedWeight && selectedWeight.includes('Bulk');
+  // Use 1 as fallback price to prevent NaN if product is null initially
+  const currentPrice = (product && isBulk) ? product.price * 2.5 : (product ? product.price : 0);
+
   useEffect(() => {
     // Check favorites
     const favs = JSON.parse(localStorage.getItem('favorites') || '[]');
@@ -115,12 +129,30 @@ const ProductDetailPage: React.FC<Props> = ({ addToCart }) => {
           </div>
 
           <div className="space-y-10">
+
+
             {/* Weight Selector */}
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary mb-4">Select Weight</p>
               <div className="flex flex-wrap gap-4 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-                <button className="px-8 py-4 border border-primary bg-primary text-white text-xs font-bold uppercase tracking-widest transition-all shadow-xl shadow-primary/10">{product.weight}</button>
-                <button className="px-8 py-4 border border-primary/10 hover:border-primary/40 text-primary/40 hover:text-primary text-xs font-bold uppercase tracking-widest transition-all">1.5kg Bulk</button>
+                <button
+                  onClick={() => setSelectedWeight(product.weight)}
+                  className={`px-8 py-4 border text-xs font-bold uppercase tracking-widest transition-all ${!isBulk
+                    ? 'border-primary bg-primary text-white shadow-xl shadow-primary/10'
+                    : 'border-primary/10 text-primary/40 hover:border-primary/40 hover:text-primary'
+                    }`}
+                >
+                  {product.weight}
+                </button>
+                <button
+                  onClick={() => setSelectedWeight('1.5kg Bulk')}
+                  className={`px-8 py-4 border text-xs font-bold uppercase tracking-widest transition-all ${isBulk
+                    ? 'border-primary bg-primary text-white shadow-xl shadow-primary/10'
+                    : 'border-primary/10 text-primary/40 hover:border-primary/40 hover:text-primary'
+                    }`}
+                >
+                  1.5kg Bulk
+                </button>
               </div>
             </div>
 
@@ -140,7 +172,7 @@ const ProductDetailPage: React.FC<Props> = ({ addToCart }) => {
               </div>
               <div className="text-right">
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/40 mb-2">Total</p>
-                <p className="font-display text-4xl font-black text-primary">${(product.price * quantity).toFixed(2)}</p>
+                <p className="font-display text-4xl font-black text-primary">${(currentPrice * quantity).toFixed(2)}</p>
               </div>
             </div>
 

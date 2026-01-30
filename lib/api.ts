@@ -90,3 +90,17 @@ export async function checkout(customerName: string, email: string, address: str
     }
     return response.json();
 }
+
+export async function searchProducts(query: string): Promise<Product[]> {
+    if (!query) return [];
+    const response = await fetch(`${API_BASE_URL}/search?q=${encodeURIComponent(query)}`);
+    if (!response.ok) {
+        throw new Error('Failed to search products');
+    }
+    return response.json();
+}
+
+export function getOptimizedImageUrl(url: string, width: number = 800): string {
+    if (!url) return '';
+    return `${API_BASE_URL}/optimize-image?url=${encodeURIComponent(url)}&width=${width}`;
+}

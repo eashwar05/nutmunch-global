@@ -2,7 +2,9 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { HashRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Product, CartItem, Page } from './types';
+import QuickLookDrawer from './components/QuickLookDrawer';
 import { PRODUCTS } from './constants';
 import HomePage from './pages/HomePage';
 import ShopPage from './pages/ShopPage';
@@ -78,7 +80,13 @@ const Header: React.FC<{ cartCount: number }> = ({ cartCount }) => {
               <span className="material-symbols-outlined !text-xl">favorite</span>
             </button>
             <Link to="/cart" className="relative hover:text-accent-gold transition-colors text-primary">
-              <span className="material-symbols-outlined !text-xl">shopping_bag</span>
+              <motion.span
+                key={cartCount}
+                animate={{ scale: [1, 1.2, 1], rotate: [0, 10, -10, 0] }}
+                className="material-symbols-outlined !text-xl inline-block"
+              >
+                shopping_bag
+              </motion.span>
               {cartCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-accent-gold text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold shadow-sm">
                   {cartCount}
@@ -159,6 +167,8 @@ const Footer: React.FC = () => (
 
 const App: React.FC = () => {
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [quickLookProduct, setQuickLookProduct] = useState<Product | null>(null);
+  const [notification, setNotification] = useState<string | null>(null);
   // const [sessionId, setSessionId] = useState<string>(''); // Removed for HttpOnly Cookie Security
 
   useEffect(() => {
@@ -178,39 +188,67 @@ const App: React.FC = () => {
   }, []);
 
   const addToCart = async (product: Product, quantity: number = 1) => {
+    // Optimistic Update
+    const prevCart = [...cart];
+    setCart(prev => {
+      const existing = prev.find(item => item.id === product.id);
+      if (existing) {
+        return prev.map(item => item.id === product.id ? { ...item, quantity: item.quantity + quantity } : item);
+      }
+      return [...prev, { ...product, quantity }];
+    });
+
+    setNotification(`Added ${quantity} x ${product.name} to cart`);
+    setTimeout(() => setNotification(null), 3000);
+
     try {
       await apiAddToCart(product.id, quantity);
-      await refreshCart();
+      // We can lazily refresh or just trust our optimistic update. 
+      // Refreshing in background is safer for consistency.
+      refreshCart();
     } catch (err) {
       console.error("Failed to add to cart", err);
+      setCart(prevCart); // Revert on failure
+      setNotification("Failed to add to cart. Please try again.");
     }
   };
 
   const removeFromCart = async (id: string) => {
-    // Note: id passed here is the product ID (as per CartPage usage)
+    const prevCart = [...cart];
     const item = cart.find(i => i.id === id);
-    if (item) {
-      try {
-        await apiAddToCart(item.id, -item.quantity);
-        await refreshCart();
-      } catch (err) {
-        console.error("Failed to remove from cart", err);
-      }
+    if (!item) return;
+
+    // Optimistic Update
+    setCart(prev => prev.filter(i => i.id !== id));
+
+    try {
+      await apiAddToCart(item.id, -item.quantity);
+      // No need to await refresh, let it happen in background
+      refreshCart();
+    } catch (err) {
+      console.error("Failed to remove from cart", err);
+      setCart(prevCart); // Revert
     }
   };
 
   const updateQuantity = async (id: string, q: number) => {
+    const prevCart = [...cart];
     const item = cart.find(i => i.id === id);
-    if (item) {
-      const diff = q - item.quantity;
-      if (diff !== 0) {
-        try {
-          await apiAddToCart(item.id, diff);
-          await refreshCart();
-        } catch (err) {
-          console.error("Failed to update quantity", err);
-        }
-      }
+    if (!item || q < 1) return; // CartPage handles 0 as remove usually, but here guard
+
+    const diff = q - item.quantity;
+    if (diff === 0) return;
+
+    // Optimistic Update
+    setCart(prev => prev.map(i => i.id === id ? { ...i, quantity: q } : i));
+
+    try {
+      await apiAddToCart(item.id, diff);
+      // No need to await
+      refreshCart();
+    } catch (err) {
+      console.error("Failed to update quantity", err);
+      setCart(prevCart); // Revert
     }
   };
 
@@ -220,9 +258,28 @@ const App: React.FC = () => {
     <Router>
       <ScrollToTop />
       <Header cartCount={cartCount} />
+      <QuickLookDrawer
+        isOpen={!!quickLookProduct}
+        onClose={() => setQuickLookProduct(null)}
+        product={quickLookProduct}
+        onAddToCart={addToCart}
+      />
+      <AnimatePresence>
+        {notification && (
+          <motion.div
+            initial={{ opacity: 0, y: -20, x: "-50%" }}
+            animate={{ opacity: 1, y: 0, x: "-50%" }}
+            exit={{ opacity: 0, y: -20, x: "-50%" }}
+            className="fixed top-24 left-1/2 z-[100] bg-primary text-white px-8 py-3 rounded shadow-xl flex items-center gap-3"
+          >
+            <span className="material-symbols-outlined text-accent-gold">check_circle</span>
+            <span className="text-sm font-medium tracking-wide">{notification}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
       <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/shop" element={<ShopPage />} />
+        <Route path="/" element={<HomePage onQuickLook={setQuickLookProduct} />} />
+        <Route path="/shop" element={<ShopPage onQuickLook={setQuickLookProduct} />} />
         <Route path="/product/:id" element={<ProductDetailPage addToCart={addToCart} />} />
         <Route path="/cart" element={<CartPage cart={cart} removeFromCart={removeFromCart} updateQuantity={updateQuantity} />} />
         <Route path="/order-confirmation" element={<OrderConfirmationPage />} />

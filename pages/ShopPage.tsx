@@ -5,7 +5,11 @@ import { Link, useLocation } from 'react-router-dom';
 import { fetchProducts } from '../lib/api';
 import { Product } from '../types';
 
-const ShopPage: React.FC = () => {
+interface ShopPageProps {
+  onQuickLook?: (product: Product) => void;
+}
+
+const ShopPage: React.FC<ShopPageProps> = ({ onQuickLook }) => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const categoryParam = searchParams.get('category');
@@ -152,7 +156,20 @@ const ShopPage: React.FC = () => {
                     ></div>
 
                     {/* Hover Overlay */}
-                    <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/5 transition-colors duration-500"></div>
+                    <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/5 transition-colors duration-500 flex items-center justify-center">
+                      {onQuickLook && (
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            onQuickLook(product);
+                          }}
+                          className="bg-white text-primary px-6 py-3 text-[10px] tracking-widest uppercase font-bold shadow-xl opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-300 hover:bg-accent-gold hover:text-white"
+                        >
+                          Quick Look
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   <div className="space-y-3 text-center">

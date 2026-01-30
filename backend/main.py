@@ -1,7 +1,11 @@
 from fastapi import FastAPI, Depends, HTTPException, Query, Request, Response
 import uuid
+import requests
+from io import BytesIO
+import base64
+from PIL import Image
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from typing import List, Optional
 from pydantic import BaseModel
 from database import SessionLocal, engine
@@ -26,6 +30,7 @@ def startup_event():
 # CORS
 origins = [
     "http://localhost:3000",
+    "http://localhost:3001",
     "http://localhost:5173",  # Common Vite local port
     "https://nutmunch-global.vercel.app",
 ]
@@ -84,7 +89,7 @@ from pydantic import BaseModel, Field
 class CartItemCreate(BaseModel):
     # session_id removed from input, handy for security
     product_id: int
-    quantity: int = Field(..., gt=0, description="Quantity must be positive")
+    quantity: int = Field(..., description="Quantity of items")
 
 class CartItem(CartItemCreate):
     id: int
@@ -108,6 +113,43 @@ class Order(BaseModel):
         orm_mode = True
 
 # Endpoints
+
+@app.get("/api/search", response_model=List[Product])
+def search_products(q: str = Query(..., min_length=1), db: Session = Depends(get_db)):
+    search_query = f"%{q}%"
+    products = db.query(models.Product).filter(
+        (models.Product.name.ilike(search_query)) | 
+        (models.Product.description.ilike(search_query)) |
+        (models.Product.category.ilike(search_query))
+    ).all()
+    return products
+
+@app.get("/api/optimize-image")
+def optimize_image(url: str, width: int = 800):
+    try:
+        # Simple proxy and optimize
+        # In a real app, you'd cache these results to avoid repeated fetches/processing
+        response = requests.get(url, stream=True)
+        response.raise_for_status()
+        
+        img = Image.open(BytesIO(response.content))
+        
+        # Calculate height to maintain aspect ratio
+        aspect_ratio = img.height / img.width
+        new_height = int(width * aspect_ratio)
+        
+        img = img.resize((width, new_height), Image.Resampling.LANCZOS)
+        
+        # Save to buffer as WebP
+        buffer = BytesIO()
+        img.save(buffer, format="WEBP", quality=80)
+        buffer.seek(0)
+        
+        return Response(content=buffer.getvalue(), media_type="image/webp")
+    except Exception as e:
+        print(f"Image optimization failed: {e}")
+        # Return error detail for debugging
+        raise HTTPException(status_code=500, detail=f"Image optimization failed: {str(e)}")
 
 @app.get("/api/products", response_model=List[Product])
 def get_products(category: Optional[str] = None, db: Session = Depends(get_db)):
@@ -167,7 +209,7 @@ def add_to_cart(item: CartItemCreate, session_id: str = Depends(get_session_id),
 
 @app.get("/api/cart", response_model=List[CartItem])
 def get_cart(session_id: str = Depends(get_session_id), db: Session = Depends(get_db)):
-    return db.query(models.CartItem).filter(models.CartItem.session_id == session_id).all()
+    return db.query(models.CartItem).options(joinedload(models.CartItem.product)).filter(models.CartItem.session_id == session_id).all()
 
 @app.post("/api/checkout", response_model=Order)
 def checkout(order_data: OrderCreate, session_id: str = Depends(get_session_id), db: Session = Depends(get_db)):
