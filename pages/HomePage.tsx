@@ -58,9 +58,9 @@ const HomePage: React.FC<HomePageProps> = ({ onQuickLook }) => {
           >
             Pure Origin • Peerless Quality
           </motion.span>
-          <h2 className="font-display text-5xl md:text-7xl text-white max-w-4xl mb-8 leading-[1.1] overflow-hidden px-4 py-2">
+          <h2 className="font-display text-3xl md:text-7xl text-white max-w-4xl mb-8 leading-[1.1] overflow-hidden px-4 py-2">
             {/* Staggered Text Reveal */}
-            <div className="flex flex-wrap justify-center gap-x-4">
+            <div className="flex flex-wrap justify-center gap-x-2 md:gap-x-4">
               {"The Essence of the Harvest".split(" ").map((word, i) => (
                 <motion.span
                   key={i}
@@ -98,7 +98,7 @@ const HomePage: React.FC<HomePageProps> = ({ onQuickLook }) => {
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 h-auto md:h-[700px]">
           {/* Main Large Card */}
-          <div className="md:col-span-7 relative group overflow-hidden rounded-lg bg-stone-200">
+          <div className="md:col-span-7 relative group overflow-hidden rounded-lg bg-stone-200 h-[400px] md:h-auto">
             <div
               className="absolute inset-0 transition-transform duration-700 group-hover:scale-105 bg-cover bg-center"
               style={{ backgroundImage: "linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 50%), url('https://lh3.googleusercontent.com/aida-public/AB6AXuBw8TaovxE1k6m315z3YOh5aE07jVpzldH9Nrqio85Kaf43pMwl7UYuTzhNtDn7i68fCh79s0nGZlx6AlrD5v1jExOuuGBCMnBDPA8Pu851PR-OHztIHbiUV6ikeE9QdDkPGkUC9Cp2bs8DvHunWtjRiY_VmngmlAoiXibfGc_xpWFNU2BONmmva-ivqrLcsmpFUwCbUCSQwy8q-5jpWpHgNzYiXP6QlwufZ1hQXfIR_wmpIesBV_qQTleuJCrKKqyyWYwROJsMLfI')" }}
@@ -111,7 +111,7 @@ const HomePage: React.FC<HomePageProps> = ({ onQuickLook }) => {
           </div>
 
           <div className="md:col-span-5 flex flex-col gap-6">
-            <div className="h-1/2 relative group overflow-hidden rounded-lg bg-stone-200">
+            <div className="h-[250px] md:h-1/2 relative group overflow-hidden rounded-lg bg-stone-200">
               <div
                 className="absolute inset-0 transition-transform duration-700 group-hover:scale-105 bg-cover bg-center"
                 style={{ backgroundImage: "linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%), url('https://lh3.googleusercontent.com/aida-public/AB6AXuCg2Sll2uXFfqR7tiYwxN_5wi0SbHWuxtBANymAzXgnEniAsQnbCXdYk4_OnMWC8aFoNVCoxfs4l_SnJ19gk4JqMrv___A5VsOZC7K8-HZYREIxkDExEdcignRCLUdimrlywafrDttbUMNIl66K5W-gD5iRVnX1BG4lozK928ve884hEkwPZ4lnlnxhJ3xKlL2gaFffM0JZfT_owOOLl3EFc65-E0NWK6639cvCW-jT5Pf39gnBCRG0eBnvW8tbnzqtCt3zQgZaXn4')" }}
@@ -121,7 +121,7 @@ const HomePage: React.FC<HomePageProps> = ({ onQuickLook }) => {
                 <Link to="/shop?category=Roasted" className="text-[9px] tracking-widest uppercase font-bold opacity-80 hover:opacity-100 hover:text-accent-gold transition-all">Shop Roast</Link>
               </div>
             </div>
-            <div className="h-1/2 relative group overflow-hidden rounded-lg bg-stone-200">
+            <div className="h-[250px] md:h-1/2 relative group overflow-hidden rounded-lg bg-stone-200">
               <div
                 className="absolute inset-0 transition-transform duration-700 group-hover:scale-105 bg-cover bg-center"
                 style={{ backgroundImage: "linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%), url('https://lh3.googleusercontent.com/aida-public/AB6AXuD5JkkXfJ_VYH_Q3IbZKROSx_GwmcnQ292s7eO4tRlq0PkBAtF6rw1BtU5fitF8cuF5RwRci3bQAKNFnM3i5Pj3PDywS7twQfzUmz1y81Mh_vkbHBm_f25GYbPBvjXX_BgeVVDLRvOc69Jqhvbp5yJpufpxBzPs3KnZ7ENyPeZnB3XBS4IDfUJUWVPdn8iZlEeD-xmaGzPrBIHygQBTZaSs6A7NWbmRx44jsemD3Ibpt6hVUqGvaHl_ABiJRvayFZv_mcAfUQoGanI')" }}
@@ -135,15 +135,47 @@ const HomePage: React.FC<HomePageProps> = ({ onQuickLook }) => {
         </div>
       </section>
 
-      {/* Signature Collection (Horizontal Scroll) */}
-      <section id="signature" ref={targetRef} className="relative h-[300vh] bg-stone-100 dark:bg-stone-900/50">
-        <div className="sticky top-0 flex h-screen items-center overflow-hidden">
-          <div className="absolute top-24 left-12 z-10 max-w-md">
+      {/* Signature Collection (Adaptive: Vertical on Mobile, Scroll-jack on Desktop) */}
+      <section id="signature" ref={targetRef} className="relative h-auto md:h-[300vh] bg-stone-100 dark:bg-stone-900/50">
+        <div className="md:sticky md:top-0 md:flex md:h-screen md:items-center md:overflow-hidden py-12 md:py-0">
+          <div className="md:absolute md:top-24 md:left-12 z-10 max-w-md px-6 md:px-0 mb-12 md:mb-0">
             <span className="text-accent-gold text-xs tracking-[0.4em] uppercase font-bold block mb-4">Signature Collection</span>
             <h2 className="font-display text-4xl text-primary dark:text-white">Curated Favorites</h2>
             <p className="mt-4 text-primary/60 dark:text-white/60 font-light hidden md:block">Swipe to explore our most coveted selections.</p>
           </div>
-          <motion.div style={{ x }} className="flex gap-12 pl-[10vw]">
+
+          {/* Mobile Layout: Vertical Stack */}
+          <div className="grid grid-cols-1 gap-12 px-6 md:hidden">
+            {bestsellers.map(product => (
+              <div key={product.id} className="w-full group relative">
+                <div className="flex flex-col gap-6 items-center bg-white dark:bg-stone-800 p-6 rounded-sm shadow-sm border border-primary/5">
+                  <div className="w-full aspect-[4/5] overflow-hidden relative">
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="w-full text-left space-y-4">
+                    <div>
+                      <p className="text-[10px] tracking-widest text-accent-gold uppercase font-bold mb-1">{product.category}</p>
+                      <h3 className="font-display text-2xl text-primary dark:text-white">{product.name}</h3>
+                    </div>
+                    <p className="text-primary/70 dark:text-white/70 font-light text-sm line-clamp-3">
+                      {product.description}
+                    </p>
+                    <div className="flex items-center justify-between pt-4 border-t border-primary/10">
+                      <span className="font-display text-xl text-primary dark:text-white">${product.price.toFixed(2)}</span>
+                      <Link to={`/product/${product.id}`} className="text-xs uppercase font-bold tracking-widest text-accent-gold">Details</Link>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop Layout: Horizontal Scroll */}
+          <motion.div style={{ x }} className="hidden md:flex gap-12 pl-[10vw]">
             {/* Intro spacer */}
             <div className="w-[30vw] flex-shrink-0" />
 

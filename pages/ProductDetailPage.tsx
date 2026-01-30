@@ -97,7 +97,7 @@ const ProductDetailPage: React.FC<Props> = ({ addToCart }) => {
       <div className="flex flex-col lg:flex-row gap-20 mb-32">
         {/* Left Column: Image Gallery */}
         <div className="flex-1 space-y-6">
-          <div className="relative group aspect-[4/5] bg-background-paper rounded-sm overflow-hidden animate-fade-in">
+          <div className="relative group aspect-square lg:aspect-[4/5] bg-background-paper rounded-sm overflow-hidden animate-fade-in">
             <div className="w-full h-full bg-center bg-no-repeat bg-contain mix-blend-multiply opacity-90 transform transition-transform duration-600 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:scale-105" style={{ backgroundImage: `url("${product.image}")` }}></div>
           </div>
           <div className="grid grid-cols-4 gap-4">

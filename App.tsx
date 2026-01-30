@@ -102,14 +102,14 @@ const Header: React.FC<{ cartCount: number }> = ({ cartCount }) => {
       </div>
 
       {/* Mobile Menu Overlay */}
-      <div className={`fixed inset-0 bg-background-light z-[60] transition-transform duration-500 ease-out ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-        <div className="flex justify-between items-center p-8 border-b border-primary/10">
+      <div className={`fixed inset-0 bg-background-light z-[60] transition-transform duration-500 ease-out flex flex-col ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+        <div className="flex justify-between items-center px-6 md:px-12 py-8 border-b border-primary/10">
           <span className="font-display text-xl font-bold text-primary">NUTMUNCH</span>
-          <button onClick={() => setIsMobileMenuOpen(false)}>
+          <button onClick={() => setIsMobileMenuOpen(false)} className="hover:rotate-90 transition-transform duration-300">
             <span className="material-symbols-outlined !text-3xl text-primary">close</span>
           </button>
         </div>
-        <div className="flex flex-col items-center justify-center h-full gap-10 text-3xl font-display text-primary">
+        <div className="flex-1 flex flex-col items-center justify-center gap-10 text-3xl font-display text-primary pb-20">
           <Link to="/shop" onClick={() => setIsMobileMenuOpen(false)} className="hover:italic transition-all">Collections</Link>
           <Link to="/#legacy" onClick={() => setIsMobileMenuOpen(false)} className="hover:italic transition-all">Heritage</Link>
           <Link to="/cart" onClick={() => setIsMobileMenuOpen(false)} className="hover:italic transition-all">Cart ({cartCount})</Link>
@@ -300,7 +300,7 @@ const App: React.FC = () => {
       </Routes>
       <Footer />
       {/* Concierge Button */}
-      <button onClick={() => alert("Concierge is currently offline. Please call +1 (800) 555-ALMD")} className="fixed bottom-8 right-8 z-50 group flex items-center gap-4">
+      <button onClick={() => alert("Concierge is currently offline. Please call +1 (800) 555-ALMD")} className="fixed bottom-8 right-8 z-50 group hidden md:flex items-center gap-4">
         <span className="bg-white dark:bg-stone-800 text-stone-800 dark:text-white px-4 py-2 rounded-full text-[10px] font-bold tracking-widest uppercase shadow-2xl transition-opacity border border-stone-200 dark:border-stone-700 opacity-0 group-hover:opacity-100">Concierge Help</span>
         <div className="w-14 h-14 bg-accent-gold text-white rounded-full flex items-center justify-center shadow-[0_10px_30px_rgba(199,161,94,0.4)] hover:scale-110 transition-transform">
           <span className="material-symbols-outlined !text-2xl">support_agent</span>

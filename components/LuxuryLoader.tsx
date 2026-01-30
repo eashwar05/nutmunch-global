@@ -12,7 +12,7 @@ const LuxuryLoader: React.FC = () => {
                     ease: [0.65, 0, 0.35, 1] // Custom bezier for "heavy" curtain lift
                 }
             }}
-            className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#FCF9F1]"
+            className="fixed inset-0 h-[100dvh] z-[9999] flex items-center justify-center bg-[#FCF9F1]"
         >
             <motion.div
                 initial={{ opacity: 0, letterSpacing: '0.1em' }}
