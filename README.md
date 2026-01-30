@@ -1,18 +1,66 @@
+# Nutmunch - Premium Nut Concierge
 
+A luxury e-commerce experience offering premium nuts and delicacies. This project demonstrates a full-stack application featuring a sophisticated, high-end design with smooth animations and a robust backend.
 
-# Run and deploy your AI Studio app
+## Features
 
-This contains everything you need to run your app locally.
+- **Premium UI/UX**: Built with React and Framer Motion for sophisticated animations and a luxury feel.
+- **Full-Stack Architecture**: React (Vite) frontend with a fast and efficient FastAPI (Python) backend.
+- **E-commerce Functionality**: Product browsing, cart management, and checkout workflow.
+- **Responsive Design**: Optimized for both desktop and mobile devices.
 
-View your app in AI Studio: https://ai.studio/apps/drive/1hYWxb7nVqztu3RkXo2jC97FJuZ3BuFpI
+## Prerequisites
 
-## Run Locally
+Before running the application, ensure you have the following installed:
 
-**Prerequisites:**  Node.js
+- **Node.js** (Latest LTS version recommended)
+- **Python** (3.8 or higher)
 
+## Installation
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/eashwar05/nutmunch-global.git
+   cd nutmunch-global
+   ```
+
+2. **Install Frontend Dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Install Backend Dependencies**
+   ```bash
+   cd backend
+   pip install -r requirements.txt
+   cd ..
+   ```
+
+## Running the Application
+
+### Option 1: Using the Startup Script (Windows)
+The easiest way to run the app is using the provided batch script, which launches both frontend and backend in separate windows.
+
+```bash
+start_app.bat
+```
+
+### Option 2: Manual Start
+
+**1. Start the Backend server:**
+```bash
+cd backend
+python -m uvicorn main:app --reload --port 8000
+```
+The API will be available at `http://localhost:8000`.
+
+**2. Start the Frontend development server:**
+(Open a new terminal window)
+```bash
+npm run dev
+```
+The application will be running at `http://localhost:5173`.
+
+## Deployment
+
+This application is hosted on [Vercel](https://vercel.com).
