@@ -8,8 +8,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session, joinedload
 from typing import List, Optional
 from pydantic import BaseModel
-from .database import SessionLocal, engine
-from . import models
+from database import SessionLocal, engine
+import models
 
 # Create tables (if not already created by seed)
 models.Base.metadata.create_all(bind=engine)
@@ -21,7 +21,7 @@ app = FastAPI()
 # Use `python backend/migrate_db.py` to migrate.
 @app.on_event("startup")
 def startup_event():
-    from .update_products import update_data
+    from update_products import update_data
     try:
         update_data()
     except Exception as e:
