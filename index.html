@@ -17,32 +17,24 @@
             theme: {
                 extend: {
                     colors: {
-                        "primary": "#1a1a1a",
-                        "primary-dark": "#000000",
-                        "accent-gold": "#C6A87C",
-                        "background-light": "#FCF9F1",
-                        "background-paper": "#FAF9F6",
-                        "background-dark": "#111",
-                        "border-soft": "#e8e4e1",
+                        primary: "#2C1810", // Deep Coffee Brown for text
+                        secondary: "#8B4513", // Saddle Brown
+                        "accent-terra": "#A0522D", // Terra Cotta for buttons/highlights
+                        "accent-gold": "#C6A87C", // Existing Gold, keeping as muted accent
+                        "background-cream": "#FDFBF7", // Main background
+                        "background-header": "#FFFFFF",
+                        "text-main": "#1A1A1A",
+                        "text-muted": "#666666",
+                        // Specific from screenshots
+                        "nuts-red": "#A52A2A",
                     },
                     fontFamily: {
-                        "display": ["Playfair Display", "serif"],
-                        "sans": ["Lato", "sans-serif"],
+                        display: ["Playfair Display", "serif"],
+                        sans: ["Lato", "sans-serif"],
                     },
-                    animation: {
-                        "fade-in": "fadeIn 0.8s ease-out forwards",
-                        "fade-in-up": "fadeInUp 0.8s ease-out forwards",
-                    },
-                    keyframes: {
-                        fadeIn: {
-                            "0%": { opacity: "0" },
-                            "100%": { opacity: "1" },
-                        },
-                        fadeInUp: {
-                            "0%": { opacity: "0", transform: "translateY(20px)" },
-                            "100%": { opacity: "1", transform: "translateY(0)" },
-                        },
-                    },
+                    backgroundImage: {
+                        'hero-pattern': "linear-gradient(to right, rgba(0,0,0,0.4), rgba(0,0,0,0.1))",
+                    }
                 },
             },
         }
@@ -61,16 +53,7 @@
             scrollbar-width: none;
         }
     </style>
-    <script type="importmap">
-{
-  "imports": {
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "react": "https://esm.sh/react@^19.2.3",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react-router-dom": "https://esm.sh/react-router-dom@^7.12.0"
-  }
-}
-</script>
+
     <link rel="stylesheet" href="/index.css">
 </head>
 

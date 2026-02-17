@@ -1,18 +1,30 @@
-from sqlalchemy.orm import Session
-from .database import SessionLocal, engine
-from . import models
+import sys
+import os
+
+# Ensure we can import from backend
+sys.path.append(os.getcwd())
+
+from backend.database import SessionLocal, engine
+from backend import models
 
 # Create tables
 models.Base.metadata.create_all(bind=engine)
 
-def seed_data():
+def force_reseed():
     db = SessionLocal()
-
-    # Check if data already exists
-    if db.query(models.Product).count() > 0:
-        print("Data already seeded.")
-        return
-
+    
+    # Clear dependent tables first
+    print("Clearing dependent tables...")
+    db.query(models.CartItem).delete()
+    db.query(models.WishlistItem).delete()
+    db.query(models.OrderItem).delete()
+    # Orders might also need clearing if cascade isn't set, but let's try just items first or safe clear
+    
+    # Clear existing products
+    print("Clearing existing products...")
+    db.query(models.Product).delete()
+    db.commit()
+    
     products = [
         {
             "id": 1,
@@ -86,7 +98,6 @@ def seed_data():
             "origin": 'Global',
             "description": 'Extra-light Chandler walnuts from the pristine orchards of Chile.'
         },
-        # New Products ensuring aesthetic variety
         {
             "id": 7,
             "name": 'Dark Chocolate Espresso Almonds',
@@ -167,7 +178,7 @@ def seed_data():
     
     db.commit()
     db.close()
-    print("Database seeded successfully!")
+    print("Database re-seeded successfully with 12 items!")
 
 if __name__ == "__main__":
-    seed_data()
+    force_reseed()

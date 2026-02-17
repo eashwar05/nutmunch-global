@@ -10,34 +10,37 @@ const OrderConfirmationPage: React.FC = () => {
     }
 
     return (
-        <main className="min-h-screen bg-background-light flex items-center justify-center p-6">
-            <div className="max-w-xl w-full bg-background-paper p-12 rounded-sm shadow-2xl animate-fade-in border border-primary/5">
+        <main className="min-h-screen bg-background-cream flex items-center justify-center p-6 py-24">
+            <div className="max-w-xl w-full bg-white p-12 rounded-3xl shadow-xl animate-fade-in border border-stone-100/50">
                 <div className="text-center mb-12">
-                    <div className="size-20 bg-accent-gold/10 text-accent-gold rounded-full flex items-center justify-center mx-auto mb-6 border border-accent-gold/20">
-                        <span className="material-symbols-outlined text-4xl">check_circle</span>
+                    <div className="size-24 bg-accent-terra/10 text-accent-terra rounded-full flex items-center justify-center mx-auto mb-8 border border-accent-terra/20">
+                        <span className="material-symbols-outlined text-5xl">check_circle</span>
                     </div>
-                    <h1 className="text-4xl font-display font-medium text-primary mb-4">Order Confirmed</h1>
-                    <p className="text-primary/60 font-light text-lg">Thank you for your purchase, {order.customer_name}.</p>
+                    <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-stone-400 block mb-4">Payment Successful</span>
+                    <h1 className="text-4xl md:text-5xl font-display font-medium text-primary mb-6">Order Confirmed</h1>
+                    <p className="text-stone-500 font-light text-lg max-w-sm mx-auto">
+                        Thank you, {order.customer_name}. Your harvest is being prepared for dispatch.
+                    </p>
                 </div>
 
-                <div className="bg-stone-50 dark:bg-stone-900 rounded-xl p-6 mb-8 border border-stone-100 dark:border-stone-800">
-                    <div className="flex justify-between items-center mb-4 border-b border-stone-200 dark:border-stone-800 pb-4">
-                        <span className="text-sm font-bold uppercase tracking-widest text-stone-400">Order ID</span>
-                        <span className="font-mono font-bold text-primary dark:text-accent-gold">#{order.id}</span>
+                <div className="bg-stone-50 rounded-2xl p-8 mb-8 border border-stone-100">
+                    <div className="flex justify-between items-center mb-6 border-b border-stone-200 pb-6">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-stone-400">Order ID</span>
+                        <span className="font-mono font-bold text-primary">#{order.id}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                        <span className="text-sm font-bold uppercase tracking-widest text-stone-400">Total Amount</span>
-                        <span className="text-2xl font-bold text-primary dark:text-gray-100">${order.total_amount.toFixed(2)}</span>
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-stone-400">Total Amount</span>
+                        <span className="text-3xl font-display text-primary">${order.total_amount.toFixed(2)}</span>
                     </div>
-                    {/* Add shipping details if available in response */}
                 </div>
 
-                <div className="space-y-4">
-                    <Link to="/shop" className="block w-full bg-primary hover:bg-primary-dark text-white text-center font-bold py-4 rounded-xl transition-all uppercase tracking-widest text-xs">
-                        Continue Shopping
+                <div className="space-y-6">
+                    <Link to="/shop" className="block w-full bg-primary hover:bg-secondary text-white text-center font-bold py-5 rounded-full transition-all uppercase tracking-[0.2em] text-xs shadow-xl shadow-primary/20">
+                        Continue Curating
                     </Link>
-                    <p className="text-center text-xs text-stone-400">
-                        A confirmation email has been sent to {order.email || 'your email'}.
+                    <p className="text-center text-xs text-stone-400 leading-relaxed">
+                        A confirmation receipt has been sent to <span className="text-primary font-bold">{order.email || 'your email'}</span>.
+                        <br />Please allow 24-48 hours for tracking details.
                     </p>
                 </div>
             </div>

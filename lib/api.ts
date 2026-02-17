@@ -2,11 +2,18 @@ import { Product, CartItem } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
-export async function fetchProducts(category?: string): Promise<Product[]> {
+export async function fetchProducts(
+    category?: string,
+    sortBy?: string,
+    minPrice?: number,
+    maxPrice?: number
+): Promise<Product[]> {
     const url = new URL(`${API_BASE_URL}/products`);
-    if (category) {
-        url.searchParams.append('category', category);
-    }
+    if (category) url.searchParams.append('category', category);
+    if (sortBy) url.searchParams.append('sort_by', sortBy);
+    if (minPrice !== undefined) url.searchParams.append('min_price', minPrice.toString());
+    if (maxPrice !== undefined) url.searchParams.append('max_price', maxPrice.toString());
+
     const response = await fetch(url.toString());
     if (!response.ok) {
         throw new Error('Failed to fetch products');
@@ -52,21 +59,11 @@ export async function getCart(): Promise<CartItem[]> {
     // Map backend structure to frontend structure
     return data.map((item: any) => ({
         ...item.product, // Spread product details
-        id: item.product ? item.product.id.toString() : item.product_id.toString(), // Use product ID as the main ID for frontend logic usually expects product ID, OR we need to be careful.
-        // Wait, App.tsx uses item.id for finding. If I use product ID, it works with addToCart logic which looks for product.id.
-        // Frontend types.ts: CartItem extends Product. So CartItem.id IS Product.id.
-        // Backend CartItem.id is the row ID of cart item.
-        // If I map item.product.id to id, I lose the unique cart item row ID, but unique product ID per session is fine.
-        // Actually, App.tsx: 
-        // const existing = prev.find(item => item.id === product.id);
-        // So distinct items are identified by product ID.
-        // So mapping product.id to id is correct for frontend expectations.
-
+        id: item.product ? item.product.id.toString() : item.product_id.toString(),
         // Map image_url
         image: item.product?.image_url || item.product?.image,
 
         quantity: item.quantity,
-        // Keep internal cart_item_id if needed, but for now flat is fine.
     }));
 }
 
@@ -82,7 +79,6 @@ export async function checkout(customerName: string, email: string, address: str
             email: email,
             address: address,
             city: city
-            // total_amount is calculated by backend now
         }),
     });
     if (!response.ok) {
@@ -103,4 +99,43 @@ export async function searchProducts(query: string): Promise<Product[]> {
 export function getOptimizedImageUrl(url: string, width: number = 800): string {
     if (!url) return '';
     return `${API_BASE_URL}/optimize-image?url=${encodeURIComponent(url)}&width=${width}`;
+}
+
+export async function subscribeToNewsletter(email: string): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/subscribe`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+    });
+    if (!response.ok) throw new Error('Failed to subscribe');
+}
+
+export async function getWishlist(): Promise<Product[]> {
+    const response = await fetch(`${API_BASE_URL}/wishlist`, {
+        credentials: 'include'
+    });
+    if (!response.ok) throw new Error('Failed to fetch wishlist');
+    const data = await response.json();
+    return data.map((item: any) => ({
+        ...item.product,
+        image: item.product?.image_url || item.product?.image,
+    }));
+}
+
+export async function addToWishlist(productId: number): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/wishlist`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ product_id: productId }),
+    });
+    if (!response.ok) throw new Error('Failed to add to wishlist');
+}
+
+export async function removeFromWishlist(productId: number): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/wishlist/${productId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to remove from wishlist');
 }

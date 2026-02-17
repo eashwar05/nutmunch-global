@@ -1,5 +1,3 @@
-
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { CartItem } from '../types';
@@ -31,16 +29,11 @@ const CartPage: React.FC<Props> = ({ cart, removeFromCart, updateQuantity }) => 
       alert("Please fill in all shipping details");
       return;
     }
-    // const sid = localStorage.getItem('session_id'); // Removed for Security
 
     setIsCheckingOut(true);
     try {
       const order = await checkout(customerName, email, address, city);
-      // Navigate to confirmation page
       navigate('/order-confirmation', { state: { order } });
-      // Force reload or state update could happen here, but navigation is clean.
-      // Ideally, App.tsx should detect cart clear, but since we navigate away, it's fine.
-      // Refreshing cart state would be good if user goes back, but backend is cleared.
     } catch (err: any) {
       alert("Checkout failed: " + (err.message || "Unknown error"));
       console.error(err);
@@ -50,176 +43,169 @@ const CartPage: React.FC<Props> = ({ cart, removeFromCart, updateQuantity }) => 
   };
 
   return (
-    <main className="max-w-7xl mx-auto px-6 py-12 min-h-screen">
-      <div className="flex flex-col lg:flex-row gap-16">
-        {/* Left Column: Cart Content & Checkout Form */}
-        <div className="flex-1 space-y-12">
+    <main className="bg-background-cream min-h-screen py-20">
+      <div className="max-w-[1440px] mx-auto px-6 md:px-12">
+        <h1 className="font-display text-4xl md:text-5xl text-primary mb-12">Your Selection</h1>
 
-          {/* Free Shipping Progress */}
-          <div className="bg-background-paper p-6 rounded-sm border border-primary/5 shadow-sm">
-            <div className="flex justify-between items-center mb-4">
-              <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-accent-gold">local_shipping</span>
-                <p className="text-primary dark:text-gray-100 font-medium tracking-tight">
-                  {subtotal >= freeShippingThreshold
-                    ? "Congratulations! You've unlocked Free Global Shipping"
-                    : `You're $${(freeShippingThreshold - subtotal).toFixed(2)} away from Free Global Shipping`}
-                </p>
-              </div>
-              <p className="text-primary font-bold">{Math.round(progress)}%</p>
-            </div>
-            <div className="relative h-2 w-full bg-stone-100 dark:bg-stone-800 rounded-full overflow-hidden">
-              <div className="absolute top-0 left-0 h-full bg-primary transition-all duration-500" style={{ width: `${progress}%` }}></div>
-            </div>
-            <div className="mt-4 flex justify-between text-xs font-bold text-stone-400 uppercase tracking-widest">
-              <span>Cart: ${subtotal.toFixed(2)}</span>
-              <span className="text-accent-gold">Goal: ${freeShippingThreshold.toFixed(2)}</span>
-            </div>
-          </div>
+        <div className="flex flex-col lg:flex-row gap-16">
+          {/* Left Column: Cart & Shipping */}
+          <div className="flex-1 space-y-12">
 
-          {/* Selection List */}
-          <div>
-            <h2 className="font-display text-3xl font-medium mb-8 text-primary">Your Selection</h2>
-            <div className="divide-y divide-primary/5 bg-background-paper rounded-sm border border-primary/5 overflow-hidden">
-              {cart.map(item => (
-                <div key={item.id} className="flex items-center gap-6 p-6 group">
-                  <div className="relative overflow-hidden rounded-lg bg-stone-100 flex-shrink-0">
-                    <div className="w-24 h-24 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style={{ backgroundImage: `url('${item.image}')` }}></div>
+            {/* Free Shipping Progress */}
+            {cart.length > 0 && (
+              <div className="bg-white p-8 rounded-2xl shadow-sm border border-stone-100">
+                <div className="flex justify-between items-center mb-4">
+                  <div className="flex items-center gap-3">
+                    <span className="material-symbols-outlined text-accent-terra">local_shipping</span>
+                    <p className="text-primary font-medium">
+                      {subtotal >= freeShippingThreshold
+                        ? "Complimentary Global Shipping Unlocked"
+                        : `Add $${(freeShippingThreshold - subtotal).toFixed(2)} for Complimentary Shipping`}
+                    </p>
                   </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-bold text-primary dark:text-gray-100">{item.name}</h3>
-                    <p className="text-sm text-stone-400 mb-4">{item.category} • {item.weight}</p>
-                    <div className="flex items-center gap-6">
-                      <div className="flex items-center border border-stone-200 dark:border-stone-700 rounded-lg overflow-hidden h-10">
-                        <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="px-3 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors">-</button>
-                        <span className="px-4 text-sm font-bold w-12 text-center">{item.quantity}</span>
-                        <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="px-3 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors">+</button>
-                      </div>
-                      <button onClick={() => removeFromCart(item.id)} className="text-xs font-bold uppercase tracking-widest text-stone-300 hover:text-red-500 transition-colors">Remove</button>
+                  <span className="font-bold text-accent-terra">{Math.round(progress)}%</span>
+                </div>
+                <div className="h-1 w-full bg-stone-100 rounded-full overflow-hidden">
+                  <div className="h-full bg-accent-terra transition-all duration-1000" style={{ width: `${progress}%` }}></div>
+                </div>
+              </div>
+            )}
+
+            {/* Cart Items */}
+            <div className="bg-white rounded-2xl border border-stone-100 overflow-hidden shadow-sm">
+              <div className="divide-y divide-stone-100">
+                {cart.map(item => (
+                  <div key={item.id} className="p-8 flex flex-col sm:flex-row items-center gap-8 group hover:bg-stone-50 transition-colors">
+                    <div className="w-24 h-24 bg-stone-100 rounded-lg overflow-hidden shrink-0">
+                      <img src={item.image} alt={item.name} className="w-full h-full object-cover mix-blend-multiply" />
+                    </div>
+                    <div className="flex-1 text-center sm:text-left space-y-1">
+                      <h3 className="font-display text-xl text-primary">{item.name}</h3>
+                      <p className="text-xs text-stone-500 font-bold uppercase tracking-widest">{item.category} — {item.weight}</p>
+                    </div>
+                    <div className="flex items-center bg-white border border-stone-200 rounded-full px-2 py-1">
+                      <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="w-8 h-8 flex items-center justify-center text-primary/40 hover:text-primary">-</button>
+                      <span className="w-8 text-center text-sm font-bold text-primary">{item.quantity}</span>
+                      <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="w-8 h-8 flex items-center justify-center text-primary/40 hover:text-primary">+</button>
+                    </div>
+                    <div className="text-right w-24">
+                      <p className="font-display text-xl text-primary">${(item.price * item.quantity).toFixed(2)}</p>
+                      <button onClick={() => removeFromCart(item.id)} className="text-[10px] uppercase font-bold text-red-400 hover:text-red-600 mt-1 tracking-widest">Remove</button>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-xl font-bold text-primary dark:text-gray-100">${(item.price * item.quantity).toFixed(2)}</p>
+                ))}
+                {cart.length === 0 && (
+                  <div className="p-16 text-center">
+                    <span className="material-symbols-outlined text-4xl text-stone-300 mb-4 block">shopping_basket</span>
+                    <p className="text-stone-500 mb-8">Your collection is empty.</p>
+                    <Link to="/shop" className="inline-block bg-primary text-white px-8 py-3 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-secondary transition-colors">Start Curating</Link>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Shipping Form */}
+            {cart.length > 0 && (
+              <form className="bg-white p-8 rounded-2xl border border-stone-100 shadow-sm space-y-8">
+                <h3 className="font-display text-2xl text-primary">Shipping Details</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-[10px] uppercase font-bold tracking-widest text-stone-400">Full Name</label>
+                    <input
+                      type="text"
+                      value={customerName}
+                      onChange={(e) => setCustomerName(e.target.value)}
+                      className="w-full bg-stone-50 border-none rounded-lg custom-input px-4 py-3 text-primary text-sm focus:ring-1 focus:ring-accent-terra placeholder:text-stone-300"
+                      placeholder="e.g. Jonathan Apple"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] uppercase font-bold tracking-widest text-stone-400">Email Address</label>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full bg-stone-50 border-none rounded-lg custom-input px-4 py-3 text-primary text-sm focus:ring-1 focus:ring-accent-terra placeholder:text-stone-300"
+                      placeholder="john@example.com"
+                    />
+                  </div>
+                  <div className="md:col-span-2 space-y-2">
+                    <label className="text-[10px] uppercase font-bold tracking-widest text-stone-400">Address Line</label>
+                    <input
+                      type="text"
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      className="w-full bg-stone-50 border-none rounded-lg custom-input px-4 py-3 text-primary text-sm focus:ring-1 focus:ring-accent-terra placeholder:text-stone-300"
+                      placeholder="Street, Apartment, Suite"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] uppercase font-bold tracking-widest text-stone-400">City</label>
+                    <input
+                      type="text"
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      className="w-full bg-stone-50 border-none rounded-lg custom-input px-4 py-3 text-primary text-sm focus:ring-1 focus:ring-accent-terra placeholder:text-stone-300"
+                      placeholder="New York"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] uppercase font-bold tracking-widest text-stone-400">Postal Code</label>
+                    <input
+                      type="text"
+                      className="w-full bg-stone-50 border-none rounded-lg custom-input px-4 py-3 text-primary text-sm focus:ring-1 focus:ring-accent-terra placeholder:text-stone-300"
+                      placeholder="10001"
+                    />
                   </div>
                 </div>
-              ))}
-
-              {cart.length === 0 && (
-                <div className="p-12 text-center">
-                  <p className="text-stone-400 mb-6">Your basket is empty.</p>
-                  <Link to="/shop" className="bg-primary text-white px-8 py-3 rounded uppercase text-xs font-bold tracking-widest">Back to Collections</Link>
-                </div>
-              )}
-            </div>
+              </form>
+            )}
           </div>
 
-          {/* Shipping Form */}
-          <div className="pt-8 border-t border-stone-100 dark:border-stone-800">
-            <h2 className="font-display text-3xl font-medium mb-8 text-primary">Shipping Information</h2>
-            <form className="grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={e => e.preventDefault()}>
-              <div className="md:col-span-2 space-y-2">
-                <label className="text-xs font-bold uppercase tracking-widest text-stone-400">Full Name</label>
-                <input
-                  className="w-full bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 rounded-lg py-3 px-4 focus:ring-primary focus:border-primary transition-all"
-                  placeholder="Enter your full name"
-                  type="text"
-                  value={customerName}
-                  onChange={e => setCustomerName(e.target.value)}
-                />
-              </div>
-              <div className="md:col-span-2 space-y-2">
-                <label className="text-xs font-bold uppercase tracking-widest text-stone-400">Email Address</label>
-                <input
-                  className="w-full bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 rounded-lg py-3 px-4 focus:ring-primary focus:border-primary transition-all"
-                  placeholder="john@example.com"
-                  type="email"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                />
-              </div>
-              <div className="md:col-span-2 space-y-2">
-                <label className="text-xs font-bold uppercase tracking-widest text-stone-400">Shipping Address</label>
-                <input
-                  className="w-full bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 rounded-lg py-3 px-4 focus:ring-primary focus:border-primary transition-all"
-                  placeholder="Street name and house number"
-                  type="text"
-                  value={address}
-                  onChange={e => setAddress(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-widest text-stone-400">City</label>
-                <input
-                  className="w-full bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 rounded-lg py-3 px-4 focus:ring-primary focus:border-primary transition-all"
-                  placeholder="Your City"
-                  type="text"
-                  value={city}
-                  onChange={e => setCity(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-widest text-stone-400">Postal Code</label>
-                <input className="w-full bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 rounded-lg py-3 px-4 focus:ring-primary focus:border-primary transition-all" placeholder="000 000" type="text" />
-              </div>
-            </form>
-          </div>
-        </div>
+          {/* Right Column: Checkout */}
+          {cart.length > 0 && (
+            <div className="w-full lg:w-[400px] shrink-0">
+              <div className="sticky top-28 space-y-6">
+                <div className="bg-primary text-white p-8 rounded-2xl shadow-2xl">
+                  <h3 className="font-display text-2xl mb-8">Order Summary</h3>
+                  <div className="space-y-4 mb-8 text-sm">
+                    <div className="flex justify-between items-center text-white/60">
+                      <span>Subtotal</span>
+                      <span>${subtotal.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-white/60">
+                      <span>Shipping</span>
+                      <span>{shipping === 0 ? 'Complimentary' : `$${shipping.toFixed(2)}`}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-white/60">
+                      <span>Est. Taxes</span>
+                      <span>${tax.toFixed(2)}</span>
+                    </div>
+                    <div className="pt-4 mt-4 border-t border-white/10 flex justify-between items-center">
+                      <span className="font-display text-lg">Total</span>
+                      <span className="font-display text-2xl text-accent-terra">${total.toFixed(2)}</span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleCheckout}
+                    disabled={isCheckingOut}
+                    className="w-full bg-white text-primary rounded-full py-4 text-[10px] font-bold uppercase tracking-widest hover:bg-accent-terra hover:text-white transition-colors disabled:opacity-50"
+                  >
+                    {isCheckingOut ? 'Processing...' : 'Secure Checkout'}
+                  </button>
+                  <p className="text-center text-[10px] text-white/30 mt-4 uppercase tracking-wider">Encrypted SSL Transaction</p>
+                </div>
 
-        {/* Right Column: Order Summary */}
-        <div className="w-full lg:w-[400px]">
-          <div className="sticky top-28 space-y-6">
-            <div className="bg-primary text-white p-8 rounded-xl shadow-xl shadow-primary/20">
-              <h3 className="font-display text-2xl font-medium mb-6">Order Summary</h3>
-              <div className="space-y-4 mb-8">
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-stone-400">Subtotal</span>
-                  <span className="font-bold">${subtotal.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-stone-400">Shipping</span>
-                  <span className="font-bold">{shipping === 0 ? 'FREE' : `$${shipping.toFixed(2)}`}</span>
-                </div>
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-stone-400">Estimated Tax (8%)</span>
-                  <span className="font-bold">${tax.toFixed(2)}</span>
-                </div>
-                <div className="pt-4 border-t border-white/10 flex justify-between items-center">
-                  <span className="text-lg font-medium">Grand Total</span>
-                  <span className="text-2xl font-bold text-accent-gold">${total.toFixed(2)}</span>
-                </div>
-              </div>
-              <button
-                onClick={handleCheckout}
-                disabled={cart.length === 0 || isCheckingOut}
-                className="w-full bg-accent-gold hover:bg-white hover:text-primary text-white font-bold py-4 rounded-lg transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-xs disabled:opacity-50"
-              >
-                <span className="material-symbols-outlined text-sm">lock</span>
-                {isCheckingOut ? 'Processing...' : 'Proceed to Secure Payment'}
-              </button>
-              <div className="mt-8 flex flex-wrap justify-center gap-4 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
-                <span className="material-symbols-outlined text-4xl">contactless</span>
-                <span className="material-symbols-outlined text-4xl">credit_card</span>
-                <span className="material-symbols-outlined text-4xl">account_balance</span>
-              </div>
-            </div>
-
-            {/* Trust Info */}
-            <div className="bg-background-light p-6 rounded-sm border border-primary/5">
-              <div className="flex items-start gap-4">
-                <span className="material-symbols-outlined text-primary dark:text-accent-gold mt-1">verified_user</span>
-                <div>
-                  <h4 className="text-sm font-bold mb-1">Authenticity Guaranteed</h4>
-                  <p className="text-xs text-stone-500 leading-relaxed">Direct from the orchard to your doorstep. Our almonds are source-verified and export certified.</p>
+                <div className="bg-white p-6 rounded-xl border border-stone-100 flex items-start gap-4">
+                  <span className="material-symbols-outlined text-accent-terra text-3xl">verified_user</span>
+                  <div>
+                    <h4 className="font-bold text-sm text-primary mb-1">Authenticity Guaranteed</h4>
+                    <p className="text-xs text-stone-500 leading-relaxed">Direct from the orchard to your doorstep. Our almonds are source-verified and export certified.</p>
+                  </div>
                 </div>
               </div>
             </div>
-
-            {/* Promo */}
-            <div className="flex gap-2">
-              <input className="flex-1 bg-transparent border-stone-200 dark:border-stone-800 rounded-lg py-2 px-4 focus:ring-primary focus:border-primary transition-all text-sm" placeholder="Promo Code" type="text" />
-              <button className="bg-primary text-white px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-primary-dark transition-colors">Apply</button>
-            </div>
-          </div>
+          )}
         </div>
       </div>
     </main>

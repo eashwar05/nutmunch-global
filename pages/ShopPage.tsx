@@ -13,29 +13,35 @@ const ShopPage: React.FC<ShopPageProps> = ({ onQuickLook }) => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const categoryParam = searchParams.get('category');
-  const gradeParam = searchParams.get('grade');
-  /* Removed duplicates */
-  const originParam = searchParams.get('origin');
-  const searchParam = searchParams.get('search');
+  const minPriceParam = searchParams.get('min_price');
+  const maxPriceParam = searchParams.get('max_price');
+  const sortByParam = searchParams.get('sort_by');
 
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filterGrade, setFilterGrade] = useState<string[]>(gradeParam ? [gradeParam] : []);
-  const [filterOrigin, setFilterOrigin] = useState<string[]>(originParam ? [originParam] : []);
+
+  // Constants for Filters
+  const CATEGORIES = ['Roasted', 'Raw', 'Confection', 'Reserve'];
+  const PRICE_RANGES = [
+    { label: 'Under $25', min: 0, max: 25 },
+    { label: '$25 - $40', min: 25, max: 40 },
+    { label: '$40 & Above', min: 40, max: 1000 }
+  ];
 
   useEffect(() => {
     const loadProducts = async () => {
       setLoading(true);
       try {
-        const data = await fetchProducts(categoryParam || undefined);
-        // The backend returns image_url, but frontend usage expects 'image'. 
-        // We need to map it or update the type. 
-        // Looking at types.ts, Product has 'image'. Backend has 'image_url'.
-        // I will map image_url to image here for compatibility.
+        const data = await fetchProducts(
+          categoryParam || undefined,
+          sortByParam || undefined,
+          minPriceParam ? parseFloat(minPriceParam) : undefined,
+          maxPriceParam ? parseFloat(maxPriceParam) : undefined
+        );
         const mappedData = data.map((p: any) => ({
           ...p,
-          image: p.image_url || p.image // Fallback if backend implementation changes
+          image: p.image_url || p.image
         }));
         setProducts(mappedData);
       } catch (err) {
@@ -45,148 +51,141 @@ const ShopPage: React.FC<ShopPageProps> = ({ onQuickLook }) => {
       }
     };
     loadProducts();
-  }, [categoryParam]);
+  }, [categoryParam, sortByParam, minPriceParam, maxPriceParam]);
 
-  const filteredProducts = products.filter(p => {
-    const gradeMatch = filterGrade.length === 0 || filterGrade.includes(p.grade);
-    const originMatch = filterOrigin.length === 0 || filterOrigin.includes(p.origin);
-    const searchMatch = !searchParam ||
-      p.name.toLowerCase().includes(searchParam.toLowerCase()) ||
-      p.description.toLowerCase().includes(searchParam.toLowerCase());
-
-    return gradeMatch && originMatch && searchMatch;
-  });
-
-  const toggleFilter = (val: string, current: string[], setter: React.Dispatch<React.SetStateAction<string[]>>) => {
-    setter(prev => prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val]);
-  };
-
-  if (loading) return <div className="flex justify-center items-center h-screen text-primary font-bold tracking-widest uppercase">Loading Registry...</div>;
-  if (error) return <div className="flex justify-center items-center h-screen text-red-500 font-bold">{error}</div>;
+  if (loading) return <div className="flex justify-center items-center h-screen text-primary font-bold tracking-widest uppercase">Loading Collection...</div>;
+  if (error) return <div className="flex justify-center items-center h-screen text-nuts-red font-bold">{error}</div>;
 
   return (
+    <main className="bg-background-cream min-h-screen pt-12 pb-24">
+      <div className="max-w-[1440px] mx-auto px-6 md:px-12">
 
-    <main className="max-w-[1440px] mx-auto px-6 lg:px-20 py-12 min-h-screen">
-      {/* Breadcrumbs & Header */}
-      <div className="mb-20 animate-fade-in">
-        <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-primary/30 mb-8">
-          <Link className="hover:text-primary transition-colors" to="/">Home</Link>
-          <span className="material-symbols-outlined text-[10px]">chevron_right</span>
-          <span className="text-primary/80">Collections</span>
+        {/* Breadcrumbs */}
+        <div className="text-[10px] uppercase font-bold tracking-widest text-primary/40 mb-8 flex items-center gap-2">
+          <Link to="/" className="hover:text-primary transition-colors">Home</Link>
+          <span>•</span>
+          <span className="text-primary">Shop All</span>
         </div>
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-10">
-          <div className="max-w-2xl">
-            <h1 className="font-display text-5xl md:text-6xl font-black text-primary mb-6 leading-[0.9]">Curated Collections</h1>
-            <p className="text-lg text-primary/60 font-light leading-relaxed max-w-xl">
-              Directly sourced from the world's most prestigious orchards. Sustainably harvested, meticulously graded, and packed for peak freshness.
-            </p>
-          </div>
-          <div className="flex items-center gap-4 border-b border-primary/10 pb-2">
-            <span className="text-xs font-bold uppercase tracking-widest text-primary/40 whitespace-nowrap">Sort Order</span>
-            <select className="bg-transparent border-none text-xs font-bold text-primary focus:ring-0 cursor-pointer uppercase tracking-widest text-right">
-              <option>Featured</option>
-              <option>Price: Low to High</option>
-              <option>Price: High to Low</option>
-              <option>Newest Harvest</option>
-            </select>
-          </div>
-        </div>
-      </div>
 
-      <div className="flex flex-col lg:flex-row gap-20">
-        {/* Sidebar Filters - Minimal */}
-        <aside className="w-full lg:w-48 flex-shrink-0 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-          <div className="sticky top-32 space-y-12">
-            <div>
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="font-display text-lg font-bold text-primary">Grade</h3>
-                {(filterGrade.length > 0) && (
-                  <button onClick={() => setFilterGrade([])} className="text-[9px] font-bold text-accent-gold uppercase tracking-widest hover:underline">Reset</button>
-                )}
-              </div>
-              <div className="space-y-4">
-                {['Premium', 'Standard', 'Reserve'].map(grade => (
-                  <label key={grade} className="flex items-center gap-3 cursor-pointer group">
-                    <div className={`w-3 h-3 border border-primary/30 flex items-center justify-center transition-all ${filterGrade.includes(grade) ? 'bg-primary border-primary' : 'bg-transparent group-hover:border-primary'}`}>
-                      {filterGrade.includes(grade) && <div className="w-1.5 h-1.5 bg-white"></div>}
-                    </div>
-                    <span className={`text-sm tracking-wide transition-colors ${filterGrade.includes(grade) ? 'text-primary font-bold' : 'text-primary/60 font-light group-hover:text-primary'}`}>{grade}</span>
-                  </label>
+        {/* Header */}
+        <div className="mb-12">
+          <h1 className="font-display text-5xl md:text-6xl text-primary font-medium mb-4">Premium Gourmet Collection</h1>
+          <p className="text-stone-500 max-w-2xl leading-relaxed font-light">
+            Elevate your snacking experience with our hand-picked selection of the world's finest nuts, roasted to perfection and seasoned with artisanal ingredients.
+          </p>
+        </div>
+
+        {/* Filter Toolbar */}
+        <div className="flex flex-col md:flex-row justify-between items-center border-t border-b border-stone-200 py-4 mb-12 gap-4">
+          {/* Left Filters */}
+          {/* Left Filters */}
+          <div className="flex gap-4 overflow-x-auto w-full md:w-auto pb-2 md:pb-0">
+            {/* Category Filter */}
+            <div className="relative group">
+              <button className={`flex items-center gap-2 text-xs font-bold uppercase tracking-wider py-2 px-4 rounded-full border transition-all whitespace-nowrap ${categoryParam ? 'bg-primary text-white border-primary' : 'bg-white text-primary border-stone-200 hover:border-accent-terra'}`}>
+                {categoryParam || 'Category'} <span className="material-symbols-outlined !text-sm">expand_more</span>
+              </button>
+              <div className="absolute top-full left-0 mt-2 bg-white border border-stone-200 shadow-xl rounded-lg overflow-hidden hidden group-hover:block z-20 min-w-[150px]">
+                <Link to="/shop" className="block px-4 py-2 hover:bg-stone-50 text-xs uppercase font-bold text-stone-500">All Categories</Link>
+                {CATEGORIES.map(cat => (
+                  <Link key={cat} to={`/shop?category=${cat}${sortByParam ? `&sort_by=${sortByParam}` : ''}`} className="block px-4 py-2 hover:bg-stone-50 text-primary">{cat}</Link>
                 ))}
               </div>
             </div>
 
-            <div className="pt-8 border-t border-primary/5">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="font-display text-lg font-bold text-primary">Origin</h3>
-                {(filterOrigin.length > 0) && (
-                  <button onClick={() => setFilterOrigin([])} className="text-[9px] font-bold text-accent-gold uppercase tracking-widest hover:underline">Reset</button>
-                )}
-              </div>
-              <div className="space-y-4">
-                {['USA (California)', 'Iran (Kerman)', 'Global'].map(origin => (
-                  <label key={origin} className="flex items-center gap-3 cursor-pointer group">
-                    <div className={`w-3 h-3 border border-primary/30 flex items-center justify-center transition-all ${filterOrigin.includes(origin) ? 'bg-primary border-primary' : 'bg-transparent group-hover:border-primary'}`}>
-                      {filterOrigin.includes(origin) && <div className="w-1.5 h-1.5 bg-white"></div>}
-                    </div>
-                    <span className={`text-sm tracking-wide transition-colors ${filterOrigin.includes(origin) ? 'text-primary font-bold' : 'text-primary/60 font-light group-hover:text-primary'}`}>{origin}</span>
-                  </label>
+            {/* Price Filter */}
+            <div className="relative group">
+              <button className={`flex items-center gap-2 text-xs font-bold uppercase tracking-wider py-2 px-4 rounded-full border transition-all whitespace-nowrap ${(minPriceParam || maxPriceParam) ? 'bg-primary text-white border-primary' : 'bg-white text-primary border-stone-200 hover:border-accent-terra'}`}>
+                Price <span className="material-symbols-outlined !text-sm">expand_more</span>
+              </button>
+              <div className="absolute top-full left-0 mt-2 bg-white border border-stone-200 shadow-xl rounded-lg overflow-hidden hidden group-hover:block z-20 min-w-[150px]">
+                <Link to="/shop" className="block px-4 py-2 hover:bg-stone-50 text-xs uppercase font-bold text-stone-500">All Prices</Link>
+                {PRICE_RANGES.map(range => (
+                  <Link
+                    key={range.label}
+                    to={`/shop?${categoryParam ? `category=${categoryParam}&` : ''}min_price=${range.min}&max_price=${range.max}${sortByParam ? `&sort_by=${sortByParam}` : ''}`}
+                    className="block px-4 py-2 hover:bg-stone-50 text-primary"
+                  >
+                    {range.label}
+                  </Link>
                 ))}
               </div>
             </div>
           </div>
-        </aside>
 
-        {/* Product Grid - Waterfall */}
-        <div className="flex-1">
-          {filteredProducts.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-16 gap-y-32">
-              {filteredProducts.map((product, index) => (
-                <Link
-                  to={`/product/${product.id}`}
-                  key={product.id}
-                  className="group block animate-fade-in-up"
-                  style={{ animationDelay: `${index * 100}ms` }}
-                >
-                  <div className="relative aspect-[4/5] bg-background-paper overflow-hidden mb-8">
-                    {/* Image with Blending */}
-                    <div
-                      className="w-full h-full bg-center bg-contain bg-no-repeat mix-blend-multiply opacity-90 transition-transform duration-1000 ease-[cubic-bezier(0.2,0.6,0.2,1)] group-hover:scale-110"
-                      style={{ backgroundImage: `url("${product.image}")` }}
-                    ></div>
+          {/* Right Sort/Count */}
+          <div className="flex items-center gap-6 text-xs text-primary/60 font-medium">
+            <span className="hidden md:inline">Showing {products.length} products</span>
+            <div className="flex items-center gap-2 cursor-pointer hover:text-primary relative group">
+              <span>Sort by: {sortByParam ? sortByParam.replace('_', ' ') : 'Featured'}</span>
+              <span className="material-symbols-outlined !text-sm">expand_more</span>
 
-                    {/* Hover Overlay */}
-                    <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/5 transition-colors duration-500 flex items-center justify-center">
-                      {onQuickLook && (
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            onQuickLook(product);
-                          }}
-                          className="bg-white text-primary px-6 py-3 text-[10px] tracking-widest uppercase font-bold shadow-xl opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-300 hover:bg-accent-gold hover:text-white"
-                        >
-                          Quick Look
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="space-y-3 text-center">
-                    <p className="text-[10px] text-accent-gold uppercase tracking-[0.2em] font-bold">{product.origin}</p>
-                    <h3 className="font-display text-2xl text-primary group-hover:text-accent-gold transition-colors">{product.name}</h3>
-                    <p className="text-primary/50 font-light text-sm tracking-widest">${product.price.toFixed(2)} USD</p>
-                  </div>
-                </Link>
-              ))}
+              <div className="absolute top-full right-0 mt-2 bg-white border border-stone-200 shadow-xl rounded-lg overflow-hidden hidden group-hover:block z-20 min-w-[150px]">
+                <Link to={`/shop${categoryParam ? `?category=${categoryParam}&` : '?'}sort_by=price_asc`} className="block px-4 py-2 hover:bg-stone-50">Price: Low to High</Link>
+                <Link to={`/shop${categoryParam ? `?category=${categoryParam}&` : '?'}sort_by=price_desc`} className="block px-4 py-2 hover:bg-stone-50">Price: High to Low</Link>
+                <Link to={`/shop${categoryParam ? `?category=${categoryParam}&` : '?'}sort_by=newest`} className="block px-4 py-2 hover:bg-stone-50">Newest Arrivals</Link>
+              </div>
             </div>
-          ) : (
-            <div className="py-32 text-center flex flex-col items-center justify-center min-h-[400px]">
-              <h3 className="text-3xl font-display text-primary/40 leading-relaxed max-w-lg mb-8">Our seasonal collection is currently being curated. Please check back shortly.</h3>
-              <button onClick={() => { setFilterGrade([]); setFilterOrigin([]); window.history.pushState({}, '', '#/shop'); }} className="text-xs font-bold text-accent-gold uppercase tracking-[0.2em] border-b border-accent-gold pb-1 hover:text-primary hover:border-primary transition-colors">View All Collections</button>
-            </div>
-          )}
+          </div>
         </div>
+
+        {/* Product Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {products.map((product) => (
+            <Link to={`/product/${product.id}`} key={product.id} className="group block">
+              <div className="bg-stone-100 relative aspect-square overflow-hidden mb-4">
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 mix-blend-multiply"
+                />
+                {onQuickLook && (
+                  <button
+                    onClick={(e) => { e.preventDefault(); onQuickLook(product); }}
+                    className="absolute bottom-4 right-4 bg-white/90 backdrop-blur text-primary w-10 h-10 rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-accent-terra hover:text-white transform translate-y-4 group-hover:translate-y-0"
+                  >
+                    <span className="material-symbols-outlined !text-lg">visibility</span>
+                  </button>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex text-accent-terra text-[10px] gap-0.5">
+                  {'★★★★★'.split('').map((star, i) => <span key={i}>{star}</span>)}
+                  <span className="text-stone-400 ml-1 font-medium">({Math.floor(Math.random() * 50) + 10})</span>
+                </div>
+                <h3 className="font-display text-xl text-primary leading-tight group-hover:text-accent-terra transition-colors">{product.name}</h3>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-primary font-bold text-sm">Rs. {product.price * 25}</span> {/* Mocking Rs conversion roughly or just changing symbol if user wants Rs */}
+                  <span className="text-[10px] text-stone-400 uppercase tracking-wide">MRP: From Rs. {(product.price * 25 * 1.2).toFixed(0)}</span>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+
+        {/* Empty State */}
+        {products.length === 0 && !loading && (
+          <div className="py-24 text-center">
+            <span className="material-symbols-outlined text-6xl text-stone-200 mb-4">search_off</span>
+            <h3 className="font-display text-2xl text-primary mb-2">No Harvest Found</h3>
+            <p className="text-stone-500 mb-8">Try adjusting your filters or search criteria.</p>
+            <Link to="/shop" className="inline-block bg-primary text-white px-8 py-3 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-secondary transition-colors">Clear All Filters</Link>
+          </div>
+        )}
+
+        {/* Pagination */}
+        {/* Pagination - Hide if few products */}
+        {products.length > 8 && (
+          <div className="mt-20 flex justify-center gap-2">
+            <button className="w-10 h-10 rounded-full border border-stone-200 flex items-center justify-center hover:bg-white transition-colors text-primary"><span className="material-symbols-outlined !text-sm">chevron_left</span></button>
+            <button className="w-10 h-10 rounded-full bg-secondary text-white font-bold text-xs flex items-center justify-center shadow-lg">1</button>
+            <button className="w-10 h-10 rounded-full border border-stone-200 flex items-center justify-center hover:bg-white transition-colors text-primary text-xs font-bold">2</button>
+            <span className="w-10 h-10 flex items-center justify-center text-stone-400">...</span>
+            <button className="w-10 h-10 rounded-full border border-stone-200 flex items-center justify-center hover:bg-white transition-colors text-primary"><span className="material-symbols-outlined !text-sm">chevron_right</span></button>
+          </div>
+        )}
+
       </div>
     </main>
   );

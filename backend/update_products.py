@@ -1,5 +1,5 @@
-from database import SessionLocal
-import models
+from .database import SessionLocal, engine
+from . import models
 import json
 
 def update_data():

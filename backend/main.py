@@ -8,8 +8,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session, joinedload
 from typing import List, Optional
 from pydantic import BaseModel
-from database import SessionLocal, engine
-import models
+from .database import SessionLocal, engine
+from . import models
 
 # Create tables (if not already created by seed)
 models.Base.metadata.create_all(bind=engine)
@@ -21,7 +21,7 @@ app = FastAPI()
 # Use `python backend/migrate_db.py` to migrate.
 @app.on_event("startup")
 def startup_event():
-    from update_products import update_data
+    from .update_products import update_data
     try:
         update_data()
     except Exception as e:
@@ -114,6 +114,18 @@ class Order(BaseModel):
     class Config:
         orm_mode = True
 
+class SubscriberCreate(BaseModel):
+    email: str
+
+class WishlistItemCreate(BaseModel):
+    product_id: int
+
+class WishlistItem(BaseModel):
+    id: int
+    product: Product
+    class Config:
+        orm_mode = True
+
 # Endpoints
 
 @app.get("/api/search", response_model=List[Product])
@@ -177,10 +189,31 @@ def optimize_image(request: Request, url: str, width: int = 800):
         raise HTTPException(status_code=500, detail="Image optimization failed")
 
 @app.get("/api/products", response_model=List[Product])
-def get_products(category: Optional[str] = None, db: Session = Depends(get_db)):
+def get_products(
+    category: Optional[str] = None, 
+    sort_by: Optional[str] = None, 
+    min_price: Optional[float] = None, 
+    max_price: Optional[float] = None,
+    db: Session = Depends(get_db)
+):
     query = db.query(models.Product)
+    
     if category:
         query = query.filter(models.Product.category == category)
+    
+    if min_price is not None:
+        query = query.filter(models.Product.price >= min_price)
+    
+    if max_price is not None:
+        query = query.filter(models.Product.price <= max_price)
+
+    if sort_by == 'price_asc':
+        query = query.order_by(models.Product.price.asc())
+    elif sort_by == 'price_desc':
+        query = query.order_by(models.Product.price.desc())
+    elif sort_by == 'newest':
+        query = query.order_by(models.Product.id.desc()) # ID proxy for newest
+
     return query.all()
 
 @app.get("/api/products/{product_id}", response_model=Product)
@@ -305,3 +338,42 @@ def checkout(order_data: OrderCreate, session_id: str = Depends(get_session_id),
     except Exception as e:
         db.rollback()
         raise e
+
+@app.post("/api/subscribe")
+def subscribe(subscriber: SubscriberCreate, db: Session = Depends(get_db)):
+    existing = db.query(models.Subscriber).filter(models.Subscriber.email == subscriber.email).first()
+    if existing:
+        return {"message": "Already subscribed"}
+    
+    new_sub = models.Subscriber(email=subscriber.email)
+    db.add(new_sub)
+    db.commit()
+    return {"message": "Subscribed successfully"}
+
+@app.get("/api/wishlist", response_model=List[WishlistItem])
+def get_wishlist(session_id: str = Depends(get_session_id), db: Session = Depends(get_db)):
+    return db.query(models.WishlistItem).options(joinedload(models.WishlistItem.product)).filter(models.WishlistItem.session_id == session_id).all()
+
+@app.post("/api/wishlist")
+def add_to_wishlist(item: WishlistItemCreate, session_id: str = Depends(get_session_id), db: Session = Depends(get_db)):
+    existing = db.query(models.WishlistItem).filter(
+        models.WishlistItem.session_id == session_id,
+        models.WishlistItem.product_id == item.product_id
+    ).first()
+    
+    if existing:
+        return {"message": "Already in wishlist"}
+
+    new_item = models.WishlistItem(session_id=session_id, product_id=item.product_id)
+    db.add(new_item)
+    db.commit()
+    return {"message": "Added to wishlist"}
+
+@app.delete("/api/wishlist/{product_id}")
+def remove_from_wishlist(product_id: int, session_id: str = Depends(get_session_id), db: Session = Depends(get_db)):
+    db.query(models.WishlistItem).filter(
+        models.WishlistItem.session_id == session_id,
+        models.WishlistItem.product_id == product_id
+    ).delete()
+    db.commit()
+    return {"message": "Removed from wishlist"}

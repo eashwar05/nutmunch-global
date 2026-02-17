@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from datetime import datetime
-from database import Base
+from .database import Base
 
 class Product(Base):
     __tablename__ = "products"
@@ -54,4 +54,21 @@ class OrderItem(Base):
     price_at_purchase = Column(Float) # Security: Record price at time of buying
 
     order = relationship("Order", back_populates="items")
+    product = relationship("Product")
+
+class Subscriber(Base):
+    __tablename__ = "subscribers"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, unique=True, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class WishlistItem(Base):
+    __tablename__ = "wishlist_items"
+
+    id = Column(Integer, primary_key=True, index=True)
+    session_id = Column(String, index=True)
+    product_id = Column(Integer, ForeignKey("products.id"))
+    created_at = Column(DateTime, default=datetime.utcnow)
+
     product = relationship("Product")
